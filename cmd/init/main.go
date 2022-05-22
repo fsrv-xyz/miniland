@@ -1,17 +1,19 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"miniland/internal/cosmetic"
 	"miniland/internal/filesystem"
 	"miniland/internal/power"
+	"miniland/internal/service"
 	"miniland/internal/sysctl"
-	"net"
+	"miniland/pkg/web"
 	"os"
 	"os/exec"
 	"syscall"
 	"time"
+
+	"golang.org/x/sys/unix"
 )
 
 func mountfs() error {
@@ -63,6 +65,8 @@ func init() {
 	if err := mountfs(); err != nil {
 		log.Println(err)
 	}
+
+	os.Mkdir("/log", 0o766)
 }
 
 func main() {
@@ -72,35 +76,28 @@ func main() {
 		power.Shutdown()
 	}()
 
-	err := sysctl.ApplyFile("/Config/sysctl.conf")
+	if err := unix.Sethostname([]byte("testing")); err != nil {
+		panic(err)
+	}
+
+	err := sysctl.ApplyFile("/etc/sysctl.conf")
 	if err != nil {
 		log.Println(err)
 	}
 
-	cosmetic.ClearScreen()
-
-	cmd := exec.Command("/bin/networking", "/Config/networking.json")
+	cmd := exec.Command("/bin/system/networking", "/etc/networking.json")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		log.Println(err)
 	}
 
-	fmt.Println("sleeping 20 seconds")
-	time.Sleep(20 * time.Second)
+	time.Sleep(10 * time.Second)
+	cosmetic.ClearScreen()
 
-	ief, err := net.InterfaceByName("eth0")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	addrs, err := ief.Addrs()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	go web.Start()
 
-	fmt.Printf("%+v\n", addrs)
-
-	syscall.Chroot(".")
+	c := make(chan bool)
+	go service.RunServices(c)
+	<-c
 }

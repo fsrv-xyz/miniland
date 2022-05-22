@@ -1,0 +1,7 @@
+{
+  "name": "node_exporter",
+  "command": "/bin/stats/node_exporter",
+  "arguments": [
+    "--web.listen-address=[::1]:9100"
+  ]
+}

@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/vishvananda/netlink"
 	"log"
 	"net"
 	"os"
+
+	"github.com/vishvananda/netlink"
 )
 
 type Config struct {
@@ -20,8 +21,8 @@ type Route struct {
 }
 
 type Interface struct {
-	Name        string `json:"name"`
-	AddressIPv4 string `json:"address4"`
+	Name    string `json:"name"`
+	Address string `json:"address"`
 }
 
 var config Config
@@ -55,7 +56,7 @@ func main() {
 			continue
 		}
 
-		address, addressParseError := netlink.ParseAddr(iface.AddressIPv4)
+		address, addressParseError := netlink.ParseAddr(iface.Address)
 		if addressParseError != nil {
 			log.Println(addressParseError)
 			continue
