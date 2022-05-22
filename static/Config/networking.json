@@ -1,0 +1,14 @@
+{
+  "routes": [
+    {
+      "destination": "0.0.0.0/0",
+      "gateway": "10.0.40.1"
+    }
+  ],
+  "interfaces": [
+    {
+      "name": "eth0",
+      "address4": "10.0.40.14/24"
+    }
+  ]
+}

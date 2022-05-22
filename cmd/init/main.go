@@ -2,23 +2,17 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
+	"miniland/internal/cosmetic"
 	"miniland/internal/filesystem"
 	"miniland/internal/power"
+	"miniland/internal/sysctl"
 	"net"
 	"os"
-	"strings"
+	"os/exec"
 	"syscall"
 	"time"
 )
-
-func Mkdir(path string, mode os.FileMode) error {
-	if err := os.MkdirAll(path, mode); err != nil {
-		return fmt.Errorf("mkdir %v: %v", path, err)
-	}
-	return nil
-}
 
 func mountfs() error {
 	for _, mountpoint := range []filesystem.Mountpoint{
@@ -55,7 +49,10 @@ func mountfs() error {
 			Fstype: filesystem.SYSFS,
 		},
 	} {
-		mountpoint.Mount()
+		err := mountpoint.Mount()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -64,46 +61,7 @@ func mountfs() error {
 func init() {
 	log.Println("init: mounting filesystems")
 	if err := mountfs(); err != nil {
-		fmt.Println(err)
-	}
-}
-
-var cmdline = make(map[string]string)
-
-func parseCmdline() error {
-	b, err := ioutil.ReadFile("/proc/cmdline")
-	if err != nil {
-		return err
-	}
-	parts := strings.Split(strings.TrimSpace(string(b)), " ")
-	for _, part := range parts {
-		// separate key/value based on the first = character;
-		// there may be multiple (e.g. in rd.luks.name)
-		if idx := strings.IndexByte(part, '='); idx > -1 {
-			cmdline[part[:idx]] = part[idx+1:]
-		} else {
-			cmdline[part] = ""
-		}
-	}
-	return nil
-}
-
-func localAddresses() {
-	interfaces, e := net.Interfaces()
-	if e != nil {
-		fmt.Println(e)
-	}
-	for _, inter := range interfaces {
-		fmt.Println("Index :", inter.Index)
-		fmt.Println("Name  :", inter.Name)
-		fmt.Println("HWaddr:", inter.HardwareAddr)
-		fmt.Println("MTU   :", inter.MTU)
-		fmt.Println("Flags :", inter.Flags)
-		addrs, _ := inter.Addrs()
-		for _, ipaddr := range addrs {
-			fmt.Println("Addr  :", ipaddr)
-		}
-		fmt.Println()
+		log.Println(err)
 	}
 }
 
@@ -111,13 +69,25 @@ func main() {
 	defer func() {
 		log.Println("shutting down")
 		time.Sleep(20 * time.Second)
-		power.Reboot()
+		power.Shutdown()
 	}()
-	time.Sleep(10 * time.Second)
 
-	parseCmdline()
-	fmt.Printf("%#v\n", cmdline)
-	localAddresses()
+	err := sysctl.ApplyFile("/Config/sysctl.conf")
+	if err != nil {
+		log.Println(err)
+	}
+
+	cosmetic.ClearScreen()
+
+	cmd := exec.Command("/bin/networking", "/Config/networking.json")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		log.Println(err)
+	}
+
+	fmt.Println("sleeping 20 seconds")
+	time.Sleep(20 * time.Second)
 
 	ief, err := net.InterfaceByName("eth0")
 	if err != nil {
@@ -129,8 +99,8 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(addrs[0])
-	fmt.Println(addrs[1])
+
+	fmt.Printf("%+v\n", addrs)
 
 	syscall.Chroot(".")
 }
