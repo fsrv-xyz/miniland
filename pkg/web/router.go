@@ -12,6 +12,7 @@ func setupRouter() *mux.Router {
 	apiRouter := router.PathPrefix("/api").Subrouter()
 	apiRouter.HandleFunc("/addresses", apiAddressesHandler)
 	apiRouter.HandleFunc("/files", apiFilesHandler)
+	apiRouter.HandleFunc("/processes", apiProcessesHandler)
 
 	return router
 }

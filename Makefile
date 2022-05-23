@@ -23,10 +23,10 @@ stats_prepare:
 	@rm -rf $(TMP)
 
 initrd_static_files:
-	rsync -rav ./static/ stage
+	rsync -ra ./static/ stage
 
 initrd_assemble:
-	cd ./stage; find . | cpio -o -H newc | gzip > ../rootfs.cpio.gz; cd ..
+	cd ./stage; find . | cpio -vo -H newc | gzip > ../rootfs.cpio.gz; cd ..
 
 build: \
 	prepare_environment \
