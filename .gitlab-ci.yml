@@ -16,7 +16,7 @@ build-initrd:
   stage: build
   image: archlinux:latest
   before_script:
-    - pacman -Syy --noconfirm base-devel
+    - pacman -Syy --noconfirm base-devel rsync
   script:
     - make build
     - ls -lah
