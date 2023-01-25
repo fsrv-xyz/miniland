@@ -22,7 +22,7 @@ build-initrd:
   cache:
     key: $CI_COMMIT_REF_SLUG
     paths:
-      - /var/cache/pacman/pkg
+      - /var/cache/pacman/pkg/*
   artifacts:
     paths:
       - rootfs.cpio.gz
