@@ -17,7 +17,7 @@ build-initrd:
   image: archlinux:base
   before_script:
     - mkdir -p cache
-    - cp -av cache/* /var/cache/pacman/pkg/
+    - cp -av cache/* /var/cache/pacman/pkg/ || true
     - pacman -Syy --noconfirm base-devel rsync wget go gzip cpio
     - cp -av /var/cache/pacman/pkg/* cache/
   script:
