@@ -19,7 +19,13 @@ build-initrd:
     - pacman -Syy --noconfirm base-devel rsync wget go gzip cpio
   script:
     - make build
-    - ls -lah
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - /var/cache/pacman/pkg
+  artifacts:
+    paths:
+      - rootfs.cpio.gz
 
 .go_template_defaults:
   stage: test
