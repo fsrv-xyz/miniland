@@ -2,18 +2,19 @@ package main
 
 import (
 	"log"
-	"miniland/internal/cosmetic"
-	"miniland/internal/filesystem"
-	"miniland/internal/power"
-	"miniland/internal/service"
-	"miniland/internal/sysctl"
-	"miniland/pkg/web"
 	"os"
 	"os/exec"
 	"syscall"
 	"time"
 
 	"golang.org/x/sys/unix"
+
+	"miniland/internal/cosmetic"
+	"miniland/internal/filesystem"
+	"miniland/internal/power"
+	"miniland/internal/service"
+	"miniland/internal/sysctl"
+	"miniland/pkg/web"
 )
 
 func mountfs() error {
@@ -85,15 +86,13 @@ func main() {
 		log.Println(err)
 	}
 
+	cosmetic.ClearScreen()
 	cmd := exec.Command("/bin/system/networking", "/etc/networking.json")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		log.Println(err)
 	}
-
-	time.Sleep(10 * time.Second)
-	cosmetic.ClearScreen()
 
 	go web.Start()
 

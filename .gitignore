@@ -1,3 +1,4 @@
 /.idea
 /rootfs.cpio.gz
 /vmlinuz
+/bzImage

@@ -1,6 +1,8 @@
 package power
 
-import "syscall"
+import (
+	"syscall"
+)
 
 func Reboot() {
 	const LINUX_REBOOT_MAGIC1 uintptr = 0xfee1dead
