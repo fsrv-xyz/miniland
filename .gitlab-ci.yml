@@ -1,6 +1,7 @@
 ---
 stages:
   - test
+  - build
   - release
 
 jsonlint:
@@ -10,6 +11,15 @@ jsonlint:
     - |
       find . -not -path './.git/*' -name '*.json' -type f -print0 |
       parallel --will-cite -k -0 -n1 jsonlint -q
+
+build-initrd:
+  stage: build
+  image: archlinux:latest
+  before_script:
+    - pacman -Syy --noconfirm base-devel
+  script:
+    - make build
+    - ls -lah
 
 .go_template_defaults:
   stage: test
