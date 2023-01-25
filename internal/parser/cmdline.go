@@ -1,13 +1,13 @@
 package parser
 
 import (
-	"io/ioutil"
+	"os"
 	"strings"
 )
 
 func ParseCmdline() (cmdline map[string]string, err error) {
 	cmdline = make(map[string]string)
-	b, err := ioutil.ReadFile("/proc/cmdline")
+	b, err := os.ReadFile("/proc/cmdline")
 	if err != nil {
 		return nil, err
 	}

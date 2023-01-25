@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -45,6 +46,11 @@ func init() {
 }
 
 func main() {
+
+	interfaces, _ := net.Interfaces()
+	for _, iface := range interfaces {
+		fmt.Println(iface.Name, iface.HardwareAddr)
+	}
 	for _, iface := range config.Interfaces {
 		link, linkFoundError := netlink.LinkByName(iface.Name)
 		if linkFoundError != nil {

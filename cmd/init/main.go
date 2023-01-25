@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -11,6 +12,7 @@ import (
 
 	"miniland/internal/cosmetic"
 	"miniland/internal/filesystem"
+	"miniland/internal/parser"
 	"miniland/internal/power"
 	"miniland/internal/service"
 	"miniland/internal/sysctl"
@@ -93,6 +95,8 @@ func main() {
 	if err := cmd.Run(); err != nil {
 		log.Println(err)
 	}
+
+	fmt.Println(parser.ParseCmdline())
 
 	go web.Start()
 

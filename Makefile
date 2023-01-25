@@ -9,18 +9,28 @@ cleanup_environment:
 	rm -r stage
 
 initrd_binary_build: export CGO_ENABLED = 0
+initrd_binary_build: export GOOS = linux
+initrd_binary_build: export GOARCH = amd64
 initrd_binary_build:
 	go build -trimpath -ldflags '-s -w' -o stage/init cmd/init/main.go
 
 networking_binary_build: export CGO_ENABLED = 0
+networking_binary_build: export GOOS = linux
+networking_binary_build: export GOARCH = amd64
 networking_binary_build:
 	go build -trimpath -ldflags '-s -w' -o stage/bin/system/networking cmd/networking/main.go
+
+prepare_ca_certificates:
+	mkdir -p stage/etc/ssl/certs
+	cp /etc/ssl/certs/ca-certificates.crt stage/etc/ssl/certs/ca-certificates.crt
 
 stats_prepare:
 	mkdir -p stage/bin/stats
 	@$(eval TMP := $(shell mktemp -d))
 	wget -qO- https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-amd64.tar.gz | tar -xz -C $(TMP)
 	wget -qO- https://github.com/prometheus/prometheus/releases/download/v2.41.0/prometheus-2.41.0.linux-amd64.tar.gz | tar -xz -C $(TMP)
+	#cat cache/node_exporter-1.5.0.linux-amd64.tar.gz | tar -xz -C $(TMP)
+	#cat cache/prometheus-2.41.0.linux-amd64.tar.gz | tar -xz -C $(TMP)
 	@cp -av $(TMP)/**/node_exporter stage/bin/stats/
 	@cp -av $(TMP)/**/prometheus stage/bin/stats/
 	@rm -rf $(TMP)
@@ -35,6 +45,7 @@ build: \
 	prepare_environment \
 	initrd_static_files \
 	stats_prepare \
+	prepare_ca_certificates \
 	initrd_binary_build \
 	networking_binary_build \
 	initrd_assemble \
