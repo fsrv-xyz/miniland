@@ -14,15 +14,17 @@ jsonlint:
 
 build-initrd:
   stage: build
-  image: archlinux:latest
+  image: archlinux:base
   before_script:
     - pacman -Syy --noconfirm base-devel rsync wget go gzip cpio
   script:
     - make build
   cache:
     key: $CI_COMMIT_REF_SLUG
-    paths:
+    files:
       - /var/cache/pacman/pkg/*
+    paths:
+      - /var/cache/pacman/pkg/
   artifacts:
     paths:
       - rootfs.cpio.gz
