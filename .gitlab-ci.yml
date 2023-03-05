@@ -52,4 +52,8 @@ rollout:
   script:
     - cp -av rootfs.cpio.gz /proj/initrd/${CI_COMMIT_REF_SLUG}.cpio.gz
     - sudo virsh destroy Miniland || true
+    - sudo virsh dumpxml Miniland > /tmp/Miniland.xml
+    - xmlstarlet ed -u domain/os/initrd -v /proj/initrd/${CI_COMMIT_REF_SLUG}.cpio.gz /tmp/Miniland.xml > /tmp/new.xml
+    - sudo virsh undefine Miniland
+    - sudo virsh define /tmp/Miniland.xml
     - sudo virsh start Miniland
