@@ -41,7 +41,7 @@ build-initrd:
     paths:
       - rootfs.cpio.gz
 
-rollout:
+testvm-rollout:
   stage: integration-test
   needs:
     - build-initrd
@@ -50,4 +50,28 @@ rollout:
   tags:
     - miniland-vm-runner
   script:
-    - cp -av rootfs.cpio.gz /proj/initrd/${CI_COMMIT_REF_SLUG}.cpio.gz
+    - sudo cp -av rootfs.cpio.gz /proj/initrd/${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}.cpio.gz
+    - sudo virsh destroy Miniland || true
+    - sudo virsh dumpxml Miniland > /tmp/Miniland.xml
+    - xmlstarlet ed -u domain/os/initrd -v /proj/initrd/${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}.cpio.gz /tmp/Miniland.xml > /tmp/new.xml
+    - sudo virsh undefine Miniland
+    - sudo virsh define /tmp/new.xml
+    - sudo virsh start Miniland
+
+testvm-test:
+  stage: integration-test
+  variables:
+    TESTVM_IP: 100.64.70.93
+  needs:
+    - testvm-rollout
+  dependencies:
+    - testvm-rollout
+  tags:
+    - miniland-vm-runner
+  timeout: 10m
+  script:
+    - |
+      until ping -c 1 "${TESTVM_IP}"; do
+        sleep 1
+      done
+    - curl -I "${TESTVM_IP}:8080/"
