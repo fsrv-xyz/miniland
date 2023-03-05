@@ -51,4 +51,5 @@ rollout:
     - miniland-vm-runner
   script:
     - cp -av rootfs.cpio.gz /proj/initrd/${CI_COMMIT_REF_SLUG}.cpio.gz
-    - sudo virsh list
+    - sudo virsh destroy Miniland || true
+    - sudo virsh start Miniland
