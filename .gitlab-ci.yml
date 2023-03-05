@@ -1,8 +1,9 @@
 ---
 stages:
   - test
-  - build
   - release
+  - build
+  - integration-test
 
 jsonlint:
   stage: test
@@ -11,6 +12,16 @@ jsonlint:
     - |
       find . -not -path './.git/*' -name '*.json' -type f -print0 |
       parallel --will-cite -k -0 -n1 jsonlint -q
+
+.go_template_defaults:
+  stage: test
+.semver_template_defaults:
+  stage: release
+variables:
+  SEMVER_PREFIX: v
+include:
+  - remote: https://gitlab.com/bonsai-oss/organization/ci-templates/-/raw/main/templates/language/go.yml
+  - remote: https://gitlab.com/bonsai-oss/organization/ci-templates/-/raw/main/templates/release/semver.yml
 
 build-initrd:
   stage: build
@@ -30,13 +41,13 @@ build-initrd:
     paths:
       - rootfs.cpio.gz
 
-.go_template_defaults:
-  stage: test
-.semver_template_defaults:
-  stage: release
-variables:
-  SEMVER_PREFIX: v
-include:
-  - remote: https://gitlab.com/bonsai-oss/organization/ci-templates/-/raw/main/templates/language/go.yml
-  - remote: https://gitlab.com/bonsai-oss/organization/ci-templates/-/raw/main/templates/release/semver.yml
-
+rollout:
+  stage: integration-test
+  needs:
+    - build-initrd
+  dependencies:
+    - build-initrd
+  tags:
+    - miniland-vm-runner
+  script:
+    - cp -av rootfs.cpio.gz /proj/initrd-${CI_COMMIT_REF_SLUG}.cpio.gz
