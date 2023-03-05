@@ -50,4 +50,4 @@ rollout:
   tags:
     - miniland-vm-runner
   script:
-    - cp -av rootfs.cpio.gz /proj/initrd-${CI_COMMIT_REF_SLUG}.cpio.gz
+    - cp -av rootfs.cpio.gz /proj/initrd/${CI_COMMIT_REF_SLUG}.cpio.gz
