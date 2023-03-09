@@ -22,6 +22,7 @@ variables:
 include:
   - remote: https://gitlab.com/bonsai-oss/organization/ci-templates/-/raw/main/templates/language/go.yml
   - remote: https://gitlab.com/bonsai-oss/organization/ci-templates/-/raw/main/templates/release/semver.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
 
 build-initrd:
   stage: build
