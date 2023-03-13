@@ -42,7 +42,7 @@ build-initrd:
     paths:
       - rootfs.cpio.gz
 
-testvm-rollout:
+TestVM rollout:
   stage: integration-test
   needs:
     - build-initrd
@@ -59,20 +59,31 @@ testvm-rollout:
     - sudo virsh define /tmp/new.xml
     - sudo virsh start Miniland
 
-testvm-test:
+.testvm_defaults:
   stage: integration-test
   variables:
     TESTVM_IP: 100.64.70.93
   needs:
-    - testvm-rollout
+    - TestVM rollout
   dependencies:
-    - testvm-rollout
+    - TestVM rollout
   tags:
     - miniland-vm-runner
+
+network connectivity:
+  extends: .testvm_defaults
   timeout: 10m
   script:
     - |
       until ping -c 1 "${TESTVM_IP}"; do
         sleep 1
       done
+
+web server connectivity:
+  extends: .testvm_defaults
+  needs:
+    - network connectivity
+  dependencies:
+    - network connectivity
+  timeout: 10m
     - curl -I "${TESTVM_IP}:8080/"
