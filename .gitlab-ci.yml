@@ -46,8 +46,6 @@ TestVM rollout:
   stage: integration-test
   needs:
     - build-initrd
-  dependencies:
-    - build-initrd
   tags:
     - miniland-vm-runner
   script:
@@ -65,8 +63,6 @@ TestVM rollout:
     TESTVM_IP: 100.64.70.93
   needs:
     - TestVM rollout
-  dependencies:
-    - TestVM rollout
   tags:
     - miniland-vm-runner
 
@@ -82,8 +78,6 @@ network connectivity:
 web server connectivity:
   extends: .testvm_defaults
   needs:
-    - network connectivity
-  dependencies:
     - network connectivity
   timeout: 10m
   script:
