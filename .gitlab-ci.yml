@@ -86,4 +86,5 @@ web server connectivity:
   dependencies:
     - network connectivity
   timeout: 10m
+  script:
     - curl -I "${TESTVM_IP}:8080/"
