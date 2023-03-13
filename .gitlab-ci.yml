@@ -72,7 +72,6 @@ testvm-test:
   timeout: 10m
   script:
     - |
-      ip a
       until ping -c 1 "${TESTVM_IP}"; do
         sleep 1
       done

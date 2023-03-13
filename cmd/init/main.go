@@ -83,6 +83,7 @@ func main() {
 		panic(err)
 	}
 
+	// read sysctl configuration
 	err := sysctl.ApplyFile("/etc/sysctl.conf")
 	if err != nil {
 		log.Println(err)

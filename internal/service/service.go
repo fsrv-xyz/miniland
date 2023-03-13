@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -126,7 +125,7 @@ func (s *service) execute(cmd *exec.Cmd) error {
 
 func RunServices(c chan bool) {
 	var wg sync.WaitGroup
-	files, err := ioutil.ReadDir(configFilePath)
+	files, err := os.ReadDir(configFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
