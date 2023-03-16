@@ -10,7 +10,8 @@ type Service struct {
 	Identifier    string
 	Configuration Configuration
 
-	cmd *exec.Cmd
+	cmd    *exec.Cmd
+	logger *Logger
 }
 
 func (s *Service) ReadConfiguration(reader io.Reader) error {
