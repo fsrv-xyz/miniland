@@ -129,11 +129,13 @@ func LoadSSEHandlerBuilder() http.HandlerFunc {
 	events := make(chan Event)
 
 	go func() {
-		// get load average
-		loadavg, _ := os.ReadFile("/proc/loadavg")
+		for {
+			// get load average
+			loadavg, _ := os.ReadFile("/proc/loadavg")
 
-		// send load average
-		events <- Event{Message: string(loadavg)}
+			// send load average
+			events <- Event{Message: string(loadavg)}
+		}
 	}()
 
 	return ServerSendEventsHandlerBuilder(events)
