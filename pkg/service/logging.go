@@ -3,8 +3,10 @@ package service
 import (
 	"bufio"
 	"io"
-	"log"
 	"os"
+
+	"github.com/rs/zerolog"
+	zlog "github.com/rs/zerolog/log"
 )
 
 type Logger struct {
@@ -18,18 +20,18 @@ func (l *Logger) Bind(stdout, stderr io.ReadCloser) {
 }
 
 func (l *Logger) Listen() {
+
 	stdoutChannel := readToChannel(l.stdoutInput)
 	stderrChannel := readToChannel(l.stderrInput)
 
-	outLog := log.New(os.Stdout, "STDOUT", 0)
-	errLog := log.New(os.Stderr, "STDERR", 0)
+	loggeri := zlog.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
 	for {
 		select {
 		case stdout := <-stdoutChannel:
-			outLog.Println(stdout)
+			loggeri.Info().Msg(stdout)
 		case stderr := <-stderrChannel:
-			errLog.Println(stderr)
+			loggeri.Warn().Msg(stderr)
 		}
 	}
 }
