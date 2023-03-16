@@ -82,3 +82,11 @@ web server connectivity:
   timeout: 10m
   script:
     - curl -I "${TESTVM_IP}:8080/"
+
+prometheus server connectivity:
+  extends: .testvm_defaults
+  needs:
+    - network connectivity
+  timeout: 10m
+  script:
+    - curl -I "${TESTVM_IP}:9090/api/v1/targets"
