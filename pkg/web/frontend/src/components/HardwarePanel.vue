@@ -20,7 +20,7 @@ export default {
     };
   },
   created: function () {
-    this.eventClient = new EventSource("http://100.64.70.93:8080/frontend/sse/load");
+    this.eventClient = new EventSource("/frontend/sse/load");
     this.eventClient.onmessage = (event) => {
       this.load = JSON.parse(event.data).message;
     };
