@@ -89,4 +89,4 @@ prometheus server connectivity:
     - network connectivity
   timeout: 10m
   script:
-    - curl -I "${TESTVM_IP}:9090/api/v1/targets"
+    - curl "${TESTVM_IP}:9090/api/v1/targets"
