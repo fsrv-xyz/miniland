@@ -1,6 +1,7 @@
 package web
 
 import (
+	"miniland/pkg/web/frontend"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -14,6 +15,7 @@ func setupRouter() *mux.Router {
 	apiRouter.HandleFunc("/files", apiFilesHandler)
 	apiRouter.HandleFunc("/processes", apiProcessesHandler)
 
+	router.PathPrefix("/").Handler(http.FileServer(http.FS(frontend.DistFileSystem())))
 	return router
 }
 

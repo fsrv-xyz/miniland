@@ -24,6 +24,17 @@ include:
   - remote: https://gitlab.com/bonsai-oss/organization/ci-templates/-/raw/main/templates/release/semver.yml
   - template: Security/Dependency-Scanning.gitlab-ci.yml
 
+build-frontend:
+  stage: build
+  image: node:latest
+  script:
+    - cd pkg/web/frontend
+    - npm install
+    - npm run build
+  artifacts:
+    paths:
+      - pkg/web/frontend/dist/
+
 build-initrd:
   stage: build
   image: archlinux:base
@@ -32,6 +43,8 @@ build-initrd:
     - cp -a cache/* /var/cache/pacman/pkg/ || true
     - pacman -Syy --noconfirm base-devel rsync wget go gzip cpio
     - cp -a /var/cache/pacman/pkg/* cache/ >/dev/null
+  needs:
+    - build-frontend
   script:
     - make build
   cache:
