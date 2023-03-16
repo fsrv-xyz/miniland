@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 )
 
@@ -10,6 +11,8 @@ func (s *Service) Start() error {
 		Path: s.Configuration.Command,
 		Args: s.Configuration.Arguments,
 	}
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
 	processStartError := cmd.Start()
 	if processStartError != nil {
