@@ -101,17 +101,17 @@ func main() {
 
 	go web.Start()
 
-	sev := service.Service{
-		Identifier: "prometheus",
+	services, err := service.DiscoverServices()
+	if err != nil {
+		log.Println(err)
 	}
 
-	cfg, _ := os.Open("/etc/services/prometheus.json")
+	for _, svc := range services {
+		fmt.Println(svc)
+		svc.Start()
+	}
 
-	sev.ReadConfiguration(cfg)
-
-	sev.Start()
-
-	time.Sleep(1000 * time.Second)
+	time.Sleep(100000 * time.Second)
 
 	//c := make(chan bool)
 	//go service.RunServices(c)
