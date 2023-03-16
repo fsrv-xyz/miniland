@@ -7,10 +7,7 @@ import (
 )
 
 func (s *Service) Start() error {
-	cmd := exec.Cmd{
-		Path: s.Configuration.Command,
-		Args: s.Configuration.Arguments,
-	}
+	cmd := exec.Command(s.Configuration.Command, s.Configuration.Arguments...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -18,7 +15,7 @@ func (s *Service) Start() error {
 	if processStartError != nil {
 		return processStartError
 	}
-	s.cmd = &cmd
+	s.cmd = cmd
 	fmt.Printf("Started %s, PID: %d\n", s.Configuration.Name, s.cmd.Process.Pid)
 	return nil
 }
