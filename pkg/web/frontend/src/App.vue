@@ -1,15 +1,16 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <img height="128" width="128" alt="Miniland Logo" src="./assets/logo.png">
+  <h1>Miniland</h1>
+  <HardwarePanel msg="OLLA"/>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import HardwarePanel from './components/HardwarePanel.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    HardwarePanel
   }
 }
 </script>
