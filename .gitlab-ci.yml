@@ -31,6 +31,11 @@ build-frontend:
     - cd pkg/web/frontend
     - npm install
     - npm run build
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - pkg/web/frontend/node_modules/
+      - pkg/web/frontend/dist/
   artifacts:
     paths:
       - pkg/web/frontend/dist/
