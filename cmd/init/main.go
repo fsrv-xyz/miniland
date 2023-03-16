@@ -14,7 +14,6 @@ import (
 	"miniland/internal/filesystem"
 	"miniland/internal/parser"
 	"miniland/internal/power"
-	"miniland/internal/service"
 	"miniland/internal/sysctl"
 	"miniland/pkg/web"
 )
@@ -99,9 +98,9 @@ func main() {
 
 	fmt.Println(parser.ParseCmdline())
 
-	go web.Start()
+	web.Start()
 
-	c := make(chan bool)
-	go service.RunServices(c)
-	<-c
+	//c := make(chan bool)
+	//go service.RunServices(c)
+	//<-c
 }
