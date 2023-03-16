@@ -24,7 +24,7 @@ func (l *Logger) Listen() {
 	stdoutChannel := readToChannel(l.stdoutInput)
 	stderrChannel := readToChannel(l.stderrInput)
 
-	loggeri := zlog.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	loggeri := zlog.Output(zerolog.New(os.Stdout).With().Timestamp().Logger())
 
 	for {
 		select {
