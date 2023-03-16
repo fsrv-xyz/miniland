@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bufio"
 	"io"
 	"log"
 	"os"
@@ -36,13 +37,9 @@ func (l *Logger) Listen() {
 func readToChannel(reader io.ReadCloser) chan string {
 	channel := make(chan string)
 	go func() {
-		for {
-			var buffer [1024]byte
-			n, err := reader.Read(buffer[:])
-			if err != nil {
-				return
-			}
-			channel <- string(buffer[:n])
+		scanner := bufio.NewScanner(reader)
+		for scanner.Scan() {
+			channel <- scanner.Text()
 		}
 	}()
 	return channel
