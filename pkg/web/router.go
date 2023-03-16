@@ -1,10 +1,11 @@
 package web
 
 import (
-	"miniland/pkg/web/frontend"
 	"net/http"
 
 	"github.com/gorilla/mux"
+
+	"miniland/pkg/web/frontend"
 )
 
 func setupRouter() *mux.Router {
