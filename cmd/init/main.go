@@ -15,6 +15,7 @@ import (
 	"miniland/internal/parser"
 	"miniland/internal/power"
 	"miniland/internal/sysctl"
+	"miniland/pkg/service"
 	"miniland/pkg/web"
 )
 
@@ -99,6 +100,18 @@ func main() {
 	fmt.Println(parser.ParseCmdline())
 
 	web.Start()
+
+	sev := service.Service{
+		Identifier: "prometheus",
+	}
+
+	cfg, _ := os.Open("/etc/services/prometheus.json")
+
+	sev.ReadConfiguration(cfg)
+
+	sev.Start()
+
+	time.Sleep(1000 * time.Second)
 
 	//c := make(chan bool)
 	//go service.RunServices(c)
