@@ -99,7 +99,7 @@ func main() {
 
 	fmt.Println(parser.ParseCmdline())
 
-	web.Start()
+	go web.Start()
 
 	sev := service.Service{
 		Identifier: "prometheus",
