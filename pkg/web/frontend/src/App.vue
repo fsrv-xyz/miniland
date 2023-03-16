@@ -2,15 +2,18 @@
   <img height="128" width="128" alt="Miniland Logo" src="./assets/logo.png">
   <h1>Miniland</h1>
   <HardwarePanel msg="OLLA"/>
+  <ProcessPanel msg="OLA"/>
 </template>
 
 <script>
 import HardwarePanel from './components/HardwarePanel.vue'
+import ProcessPanel from './components/ProcessPanel.vue'
 
 export default {
   name: 'App',
   components: {
-    HardwarePanel
+    HardwarePanel,
+    ProcessPanel,
   }
 }
 </script>

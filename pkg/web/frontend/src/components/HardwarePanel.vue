@@ -16,16 +16,13 @@ export default {
   data() {
     return {
       eventClient: null,
-      load: "foo",
+      load: "0",
     };
-  },
-  mounted() {
   },
   created: function () {
     this.eventClient = new EventSource("http://100.64.70.93:8080/frontend/sse/load");
     this.eventClient.onmessage = (event) => {
-      console.log(event.data);
-      this.load = event.data;
+      this.load = JSON.parse(event.data).message;
     };
   }
 }

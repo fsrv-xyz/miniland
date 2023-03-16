@@ -59,6 +59,8 @@ func apiProcessesHandler(response http.ResponseWriter, request *http.Request) {
 	encoder := json.NewEncoder(response)
 	encoder.SetEscapeHTML(true)
 	encoder.SetIndent("", "  ")
+	// TODO: remove in prod	mode
+	response.Header().Set("Access-Controll-Allow-Origin", "*")
 	encoder.Encode(plist)
 }
 
