@@ -18,7 +18,7 @@ func (s *Service) Start() error {
 		return err
 	}
 	s.logger.Bind(stdout, stderr)
-	go s.logger.Listen()
+	go s.logger.Listen(s.Identifier)
 
 	processStartError := cmd.Start()
 	if processStartError != nil {
