@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -123,16 +124,30 @@ func (p *Process) refresh() error {
 	return err
 }
 
-func LoadSSEHandlerBuilder() http.HandlerFunc {
+func UsageSSEHandlerBuilder() http.HandlerFunc {
 	events := make(chan Event)
+
+	bToMb := func(b uint64) uint64 {
+		return b / 1024 / 1024
+	}
 
 	go func() {
 		for {
 			// get load average
 			loadavg, _ := os.ReadFile("/proc/loadavg")
 
+			// get memory usage
+			var m runtime.MemStats
+			runtime.ReadMemStats(&m)
+
 			// send load average
-			events <- Event{Message: string(loadavg)}
+			events <- Event{Message: struct {
+				LoadAvg string `json:"loadavg"`
+				MemUsed uint64 `json:"memused"`
+			}{
+				LoadAvg: string(loadavg),
+				MemUsed: bToMb(m.Alloc),
+			}}
 		}
 	}()
 

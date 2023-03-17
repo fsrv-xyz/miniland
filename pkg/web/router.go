@@ -17,7 +17,7 @@ func setupRouter() *mux.Router {
 	apiRouter.HandleFunc("/processes", apiProcessesHandler)
 
 	frontendRouter := router.PathPrefix("/frontend").Subrouter()
-	frontendRouter.HandleFunc("/sse/load", LoadSSEHandlerBuilder())
+	frontendRouter.HandleFunc("/sse/usage", UsageSSEHandlerBuilder())
 
 	router.PathPrefix("/").Handler(http.FileServer(http.FS(frontend.DistFileSystem())))
 	return router

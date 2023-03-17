@@ -1,16 +1,16 @@
 <template>
   <img height="128" width="128" alt="Miniland Logo" src="./assets/logo.png">
   <h1>Miniland</h1>
-  <HardwarePanel msg="changeme"/>
+  <SystemUsagePanel title="System usage"/>
 </template>
 
 <script>
-import HardwarePanel from './components/HardwarePanel.vue'
+import SystemUsagePanel from './components/SystemUsagePanel.vue'
 
 export default {
   name: 'App',
   components: {
-    HardwarePanel,
+    SystemUsagePanel,
   }
 }
 </script>

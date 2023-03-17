@@ -9,7 +9,7 @@ import (
 )
 
 type Event struct {
-	Message string `json:"message"`
+	Message any `json:"message"`
 }
 
 func ServerSendEventsHandlerBuilder(events <-chan Event) http.HandlerFunc {
