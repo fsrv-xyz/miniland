@@ -3,6 +3,9 @@ package service
 import (
 	"fmt"
 	"os/exec"
+	"time"
+
+	zlog "github.com/rs/zerolog/log"
 )
 
 func (s *Service) Start() error {
@@ -25,7 +28,16 @@ func (s *Service) Start() error {
 		return processStartError
 	}
 	s.cmd = cmd
-	fmt.Printf("Started %s, PID: %d\n", s.Configuration.Name, s.cmd.Process.Pid)
+	zlog.Debug().
+		Str("pid", fmt.Sprintf("%d", s.cmd.Process.Pid)).
+		Str("service", s.Identifier).
+		Msg("Started service")
+
+	go NewWatchdog(cmd).Wait(func(exitError error) {
+		<-time.After(5 * time.Second)
+		s.Start()
+	})
+
 	return nil
 }
 
