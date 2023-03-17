@@ -8,15 +8,17 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/rs/zerolog"
+	zlog "github.com/rs/zerolog/log"
 	"golang.org/x/sys/unix"
 
-	"miniland/internal/cosmetic"
-	"miniland/internal/filesystem"
-	"miniland/internal/parser"
-	"miniland/internal/power"
-	"miniland/internal/service"
-	"miniland/internal/sysctl"
-	"miniland/pkg/web"
+	"ref.ci/fsrvcorp/miniland/userland/internal/cosmetic"
+	"ref.ci/fsrvcorp/miniland/userland/internal/filesystem"
+	"ref.ci/fsrvcorp/miniland/userland/internal/parser"
+	"ref.ci/fsrvcorp/miniland/userland/internal/power"
+	"ref.ci/fsrvcorp/miniland/userland/internal/sysctl"
+	"ref.ci/fsrvcorp/miniland/userland/pkg/service"
+	"ref.ci/fsrvcorp/miniland/userland/pkg/web"
 )
 
 func mountfs() error {
@@ -70,6 +72,10 @@ func init() {
 	}
 
 	os.Mkdir("/log", 0o766)
+
+	zlog.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).With().Timestamp().Logger().With().Caller().Logger()
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+
 }
 
 func main() {
@@ -83,6 +89,7 @@ func main() {
 		panic(err)
 	}
 
+	// read sysctl configuration
 	err := sysctl.ApplyFile("/etc/sysctl.conf")
 	if err != nil {
 		log.Println(err)
@@ -98,9 +105,22 @@ func main() {
 
 	fmt.Println(parser.ParseCmdline())
 
+	zlog.Info().Msg("starting web server")
 	go web.Start()
 
-	c := make(chan bool)
-	go service.RunServices(c)
-	<-c
+	zlog.Info().Msg("starting services")
+	services, err := service.DiscoverServices()
+	if err != nil {
+		log.Println(err)
+	}
+	for _, svc := range services {
+		zlog.Info().Msgf("starting service %s", svc.Configuration.Name)
+		svc.Start()
+	}
+
+	time.Sleep(100000 * time.Second)
+
+	//c := make(chan bool)
+	//go service.RunServices(c)
+	//<-c
 }

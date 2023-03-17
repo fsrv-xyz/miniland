@@ -20,9 +20,25 @@ jsonlint:
 variables:
   SEMVER_PREFIX: v
 include:
-  - remote: https://gitlab.com/bonsai-oss/organization/ci-templates/-/raw/main/templates/language/go.yml
-  - remote: https://gitlab.com/bonsai-oss/organization/ci-templates/-/raw/main/templates/release/semver.yml
+  - { project: fsrvcorp/templates, file: templates/language/go.yml }
+  - { project: fsrvcorp/templates, file: templates/release/semver.yml }
   - template: Security/Dependency-Scanning.gitlab-ci.yml
+
+build-frontend:
+  stage: build
+  image: node:latest
+  script:
+    - cd pkg/web/frontend
+    - npm install
+    - npm run build
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - pkg/web/frontend/node_modules/
+      - pkg/web/frontend/dist/
+  artifacts:
+    paths:
+      - pkg/web/frontend/dist/
 
 build-initrd:
   stage: build
@@ -32,6 +48,8 @@ build-initrd:
     - cp -a cache/* /var/cache/pacman/pkg/ || true
     - pacman -Syy --noconfirm base-devel rsync wget go gzip cpio
     - cp -a /var/cache/pacman/pkg/* cache/ >/dev/null
+  needs:
+    - build-frontend
   script:
     - make build
   cache:
@@ -42,11 +60,9 @@ build-initrd:
     paths:
       - rootfs.cpio.gz
 
-testvm-rollout:
+TestVM rollout:
   stage: integration-test
   needs:
-    - build-initrd
-  dependencies:
     - build-initrd
   tags:
     - miniland-vm-runner
@@ -59,21 +75,36 @@ testvm-rollout:
     - sudo virsh define /tmp/new.xml
     - sudo virsh start Miniland
 
-testvm-test:
+.testvm_defaults:
   stage: integration-test
   variables:
     TESTVM_IP: 100.64.70.93
   needs:
-    - testvm-rollout
-  dependencies:
-    - testvm-rollout
+    - TestVM rollout
   tags:
     - miniland-vm-runner
+
+network connectivity:
+  extends: .testvm_defaults
   timeout: 10m
   script:
     - |
-      ip a
       until ping -c 1 "${TESTVM_IP}"; do
         sleep 1
       done
+
+web server connectivity:
+  extends: .testvm_defaults
+  needs:
+    - network connectivity
+  timeout: 10m
+  script:
     - curl -I "${TESTVM_IP}:8080/"
+
+prometheus server connectivity:
+  extends: .testvm_defaults
+  needs:
+    - network connectivity
+  timeout: 10m
+  script:
+    - curl "${TESTVM_IP}:9090/api/v1/targets"

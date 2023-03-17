@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+
+	"ref.ci/fsrvcorp/miniland/userland/pkg/web/frontend"
 )
 
 func setupRouter() *mux.Router {
@@ -14,6 +16,10 @@ func setupRouter() *mux.Router {
 	apiRouter.HandleFunc("/files", apiFilesHandler)
 	apiRouter.HandleFunc("/processes", apiProcessesHandler)
 
+	frontendRouter := router.PathPrefix("/frontend").Subrouter()
+	frontendRouter.HandleFunc("/sse/usage", UsageSSEHandlerBuilder())
+
+	router.PathPrefix("/").Handler(http.FileServer(http.FS(frontend.DistFileSystem())))
 	return router
 }
 

@@ -3,13 +3,13 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -54,8 +54,7 @@ func apiFilesHandler(response http.ResponseWriter, request *http.Request) {
 }
 
 func apiProcessesHandler(response http.ResponseWriter, request *http.Request) {
-	var procdir string = "/proc"
-	plist, _ := processes(procdir)
+	plist, _ := processes("/proc")
 	encoder := json.NewEncoder(response)
 	encoder.SetEscapeHTML(true)
 	encoder.SetIndent("", "  ")
@@ -75,7 +74,7 @@ type Process struct {
 func processes(procdir string) ([]Process, error) {
 	var parr []Process
 
-	files, err := ioutil.ReadDir(fmt.Sprintf(procdir))
+	files, err := os.ReadDir(procdir)
 
 	if err != nil {
 		log.Fatal(err)
@@ -100,11 +99,11 @@ func (p *Process) refresh() error {
 	statPath := fmt.Sprintf("/proc/%d/stat", p.Pid)
 	cmdlinePath := fmt.Sprintf("/proc/%d/cmdline", p.Pid)
 	exelinkPath := fmt.Sprintf("/proc/%d/exe", p.Pid)
-	dataBytes, err := ioutil.ReadFile(statPath)
+	dataBytes, err := os.ReadFile(statPath)
 	if err != nil {
 		return err
 	}
-	cmdlineBytes, err := ioutil.ReadFile(cmdlinePath)
+	cmdlineBytes, err := os.ReadFile(cmdlinePath)
 	if err != nil {
 		return err
 	}
@@ -123,4 +122,34 @@ func (p *Process) refresh() error {
 		&p.PPid)
 
 	return err
+}
+
+func UsageSSEHandlerBuilder() http.HandlerFunc {
+	events := make(chan Event)
+
+	bToMb := func(b uint64) uint64 {
+		return b / 1024 / 1024
+	}
+
+	go func() {
+		for {
+			// get load average
+			loadavg, _ := os.ReadFile("/proc/loadavg")
+
+			// get memory usage
+			var m runtime.MemStats
+			runtime.ReadMemStats(&m)
+
+			// send load average
+			events <- Event{Message: struct {
+				LoadAvg string `json:"loadavg"`
+				MemUsed uint64 `json:"memused"`
+			}{
+				LoadAvg: string(loadavg),
+				MemUsed: bToMb(m.Sys),
+			}}
+		}
+	}()
+
+	return ServerSendEventsHandlerBuilder(events)
 }
