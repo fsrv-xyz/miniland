@@ -3,7 +3,6 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -75,7 +74,7 @@ type Process struct {
 func processes(procdir string) ([]Process, error) {
 	var parr []Process
 
-	files, err := ioutil.ReadDir(fmt.Sprintf(procdir))
+	files, err := os.ReadDir(fmt.Sprintf(procdir))
 
 	if err != nil {
 		log.Fatal(err)
@@ -100,11 +99,11 @@ func (p *Process) refresh() error {
 	statPath := fmt.Sprintf("/proc/%d/stat", p.Pid)
 	cmdlinePath := fmt.Sprintf("/proc/%d/cmdline", p.Pid)
 	exelinkPath := fmt.Sprintf("/proc/%d/exe", p.Pid)
-	dataBytes, err := ioutil.ReadFile(statPath)
+	dataBytes, err := os.ReadFile(statPath)
 	if err != nil {
 		return err
 	}
-	cmdlineBytes, err := ioutil.ReadFile(cmdlinePath)
+	cmdlineBytes, err := os.ReadFile(cmdlinePath)
 	if err != nil {
 		return err
 	}

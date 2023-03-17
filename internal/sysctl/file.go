@@ -1,13 +1,13 @@
 package sysctl
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 )
 
 func ApplyFile(path string) error {
-	content, err := ioutil.ReadFile(path)
+	content, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
