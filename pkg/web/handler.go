@@ -146,7 +146,7 @@ func UsageSSEHandlerBuilder() http.HandlerFunc {
 				MemUsed uint64 `json:"memused"`
 			}{
 				LoadAvg: string(loadavg),
-				MemUsed: bToMb(m.Alloc),
+				MemUsed: bToMb(m.Sys),
 			}}
 		}
 	}()

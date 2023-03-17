@@ -8,7 +8,7 @@
       </tr>
       <tr>
         <td class="head">Memory:</td>
-        <td class="content">{{ memory }}</td>
+        <td class="content">{{ memory }} MiB</td>
       </tr>
     </table>
   </div>
