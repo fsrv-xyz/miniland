@@ -12,13 +12,13 @@ import (
 	zlog "github.com/rs/zerolog/log"
 	"golang.org/x/sys/unix"
 
-	"miniland/internal/cosmetic"
-	"miniland/internal/filesystem"
-	"miniland/internal/parser"
-	"miniland/internal/power"
-	"miniland/internal/sysctl"
-	"miniland/pkg/service"
-	"miniland/pkg/web"
+	"ref.ci/fsrvcorp/miniland/userland/internal/cosmetic"
+	"ref.ci/fsrvcorp/miniland/userland/internal/filesystem"
+	"ref.ci/fsrvcorp/miniland/userland/internal/parser"
+	"ref.ci/fsrvcorp/miniland/userland/internal/power"
+	"ref.ci/fsrvcorp/miniland/userland/internal/sysctl"
+	"ref.ci/fsrvcorp/miniland/userland/pkg/service"
+	"ref.ci/fsrvcorp/miniland/userland/pkg/web"
 )
 
 func mountfs() error {

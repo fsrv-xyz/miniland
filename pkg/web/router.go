@@ -5,7 +5,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"miniland/pkg/web/frontend"
+	"ref.ci/fsrvcorp/miniland/userland/pkg/web/frontend"
 )
 
 func setupRouter() *mux.Router {

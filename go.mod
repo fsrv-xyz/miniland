@@ -1,4 +1,4 @@
-module miniland
+module ref.ci/fsrvcorp/miniland/userland
 
 go 1.18
 
