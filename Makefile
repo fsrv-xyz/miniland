@@ -28,9 +28,7 @@ stats_prepare:
 	mkdir -p stage/bin/stats
 	@$(eval TMP := $(shell mktemp -d))
 	wget -qO- https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-amd64.tar.gz | tar -xz -C $(TMP)
-	wget -qO- https://github.com/prometheus/prometheus/releases/download/v2.41.0/prometheus-2.41.0.linux-amd64.tar.gz | tar -xz -C $(TMP)
-	#cat cache/node_exporter-1.5.0.linux-amd64.tar.gz | tar -xz -C $(TMP)
-	#cat cache/prometheus-2.41.0.linux-amd64.tar.gz | tar -xz -C $(TMP)
+	wget -qO- https://github.com/prometheus/prometheus/releases/download/v2.42.0/prometheus-2.42.0.linux-amd64.tar.gz | tar -xz -C $(TMP)
 	@cp -av $(TMP)/**/node_exporter stage/bin/stats/
 	@cp -av $(TMP)/**/prometheus stage/bin/stats/
 	@rm -rf $(TMP)
