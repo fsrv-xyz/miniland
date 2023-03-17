@@ -20,8 +20,8 @@ jsonlint:
 variables:
   SEMVER_PREFIX: v
 include:
-  - remote: https://gitlab.com/bonsai-oss/organization/ci-templates/-/raw/main/templates/language/go.yml
-  - remote: https://gitlab.com/bonsai-oss/organization/ci-templates/-/raw/main/templates/release/semver.yml
+  - { project: fsrvcorp/templates, file: templates/language/go.yml }
+  - { project: fsrvcorp/templates, file: templates/release/semver.yml }
   - template: Security/Dependency-Scanning.gitlab-ci.yml
 
 build-frontend:
