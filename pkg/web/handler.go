@@ -53,8 +53,7 @@ func apiFilesHandler(response http.ResponseWriter, request *http.Request) {
 }
 
 func apiProcessesHandler(response http.ResponseWriter, request *http.Request) {
-	var procdir string = "/proc"
-	plist, _ := processes(procdir)
+	plist, _ := processes("/proc")
 	encoder := json.NewEncoder(response)
 	encoder.SetEscapeHTML(true)
 	encoder.SetIndent("", "  ")
@@ -74,7 +73,7 @@ type Process struct {
 func processes(procdir string) ([]Process, error) {
 	var parr []Process
 
-	files, err := os.ReadDir(fmt.Sprintf(procdir))
+	files, err := os.ReadDir(procdir)
 
 	if err != nil {
 		log.Fatal(err)
