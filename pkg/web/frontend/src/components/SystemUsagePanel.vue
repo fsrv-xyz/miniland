@@ -12,7 +12,7 @@
       </tr>
       <tr>
         <td class="head">Filesystem Available:</td>
-        <td class="content">{{ disk }} MiB</td>
+        <td class="content">{{ disk.free }} MiB / {{ disk.total }} MiB</td>
       </tr>
     </table>
   </div>
@@ -29,7 +29,10 @@ export default {
       eventClient: null,
       load: "n/a",
       memory: "n/a",
-      disk: "n/a",
+      disk: {
+        "total": "n/a",
+        "free": "n/a",
+      },
     };
   },
   created: function () {
@@ -38,7 +41,9 @@ export default {
       const payload = JSON.parse(event.data).message;
       this.load = payload.loadavg;
       this.memory = payload.memused;
-      this.disk = payload.diskavail;
+     // this.disk = payload.diskavail;
+      this.disk.free = payload.diskavail;
+      this.disk.total = payload.disktotal;
     };
   }
 }
