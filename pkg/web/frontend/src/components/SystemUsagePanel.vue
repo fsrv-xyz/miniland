@@ -12,7 +12,7 @@
       </tr>
       <tr>
         <td class="head">Filesystem:</td>
-        <td class="content">{{ disk.free }} / {{ disk.total }} MiB</td>
+        <td class="content">{{ disk.used }} / {{ disk.total }} MiB</td>
       </tr>
     </table>
   </div>
