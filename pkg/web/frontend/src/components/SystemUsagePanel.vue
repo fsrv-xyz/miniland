@@ -10,6 +10,10 @@
         <td class="head">Memory:</td>
         <td class="content">{{ memory }} MiB</td>
       </tr>
+      <tr>
+        <td class="head">Filesystem Available:</td>
+        <td class="content">{{ disk }} MiB</td>
+      </tr>
     </table>
   </div>
 </template>
@@ -25,6 +29,7 @@ export default {
       eventClient: null,
       load: "n/a",
       memory: "n/a",
+      disk: "n/a",
     };
   },
   created: function () {
@@ -33,6 +38,7 @@ export default {
       const payload = JSON.parse(event.data).message;
       this.load = payload.loadavg;
       this.memory = payload.memused;
+      this.disk = payload.diskavail;
     };
   }
 }

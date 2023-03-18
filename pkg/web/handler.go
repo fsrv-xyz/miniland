@@ -12,6 +12,8 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+
+	"golang.org/x/sys/unix"
 )
 
 func apiAddressesHandler(response http.ResponseWriter, request *http.Request) {
@@ -140,13 +142,19 @@ func UsageSSEHandlerBuilder() http.HandlerFunc {
 			var m runtime.MemStats
 			runtime.ReadMemStats(&m)
 
+			// get free disk space
+			var stat unix.Statfs_t
+			unix.Statfs("/", &stat)
+
 			// send load average
 			events <- Event{Message: struct {
-				LoadAvg string `json:"loadavg"`
-				MemUsed uint64 `json:"memused"`
+				LoadAvg   string `json:"loadavg"`
+				MemUsed   uint64 `json:"memused"`
+				DiskAvail uint64 `json:"diskavail"`
 			}{
-				LoadAvg: string(loadavg),
-				MemUsed: bToMb(m.Sys),
+				LoadAvg:   string(loadavg),
+				MemUsed:   bToMb(m.Sys),
+				DiskAvail: bToMb(stat.Bavail * uint64(stat.Bsize)),
 			}}
 		}
 	}()

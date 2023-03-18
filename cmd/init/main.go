@@ -28,7 +28,7 @@ func mountfs() error {
 			Target: "/tmp",
 			Fstype: filesystem.TMPFS,
 			Flags:  syscall.MS_NOSUID | syscall.MS_NODEV | syscall.MS_RELATIME,
-			Data:   "size=50M",
+			Data:   "size=200M",
 		},
 		{
 			Source: filesystem.DEVTMPFS,
@@ -118,9 +118,6 @@ func main() {
 		svc.Start()
 	}
 
-	time.Sleep(100000 * time.Second)
-
-	//c := make(chan bool)
-	//go service.RunServices(c)
-	//<-c
+	// wait indefinitely
+	select {}
 }

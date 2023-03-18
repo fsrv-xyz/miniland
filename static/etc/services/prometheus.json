@@ -5,7 +5,7 @@
     "--config.file=/etc/prometheus.yml",
     "--storage.tsdb.retention.time=4h",
     "--web.listen-address=:9090",
-    "--storage.tsdb.path=/tmp/",
+    "--storage.tsdb.path=/tmp",
     "--storage.tsdb.min-block-duration=2h",
     "--storage.tsdb.max-block-duration=2h"
   ]
