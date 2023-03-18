@@ -13,8 +13,7 @@
       <tr>
         <td class="head">Filesystem:</td>
         <td class="content">
-          {{ disk.used }} / {{ disk.total }} MiB
-          <progress max="100" :value=disk.percent>{{ disk.percent }}%</progress>
+          <SingleFilesystemUsage v-for="disk in disks" :key="disk.path" :data="disk"/>
         </td>
       </tr>
     </table>
@@ -23,8 +22,13 @@
 </template>
 
 <script>
+import SingleFilesystemUsage from './SingleFilesystemUsage.vue'
+
 export default {
   name: 'SystemUsagePanel',
+  components: {
+    SingleFilesystemUsage,
+  },
   props: {
     title: String,
   },
@@ -33,22 +37,16 @@ export default {
       eventClient: null,
       load: "n/a",
       memory: "n/a",
-      disk: {
-        "total": "n/a",
-        "used": "n/a",
-        "percent": "n/a",
-      },
+      disks: [],
     };
   },
   created: function () {
-    this.eventClient = new EventSource("/frontend/sse/usage");
+    this.eventClient = new EventSource("https://miniland.wwwtest.org/frontend/sse/usage");
     this.eventClient.onmessage = (event) => {
       const payload = JSON.parse(event.data).message;
       this.load = payload.loadavg;
       this.memory = payload.memused;
-      this.disk.used = payload.diskused;
-      this.disk.total = payload.disktotal;
-      this.disk.percent = this.disk.used / this.disk.total * 100;
+      this.disks = payload.disks.filter(disk => disk.Total !== 0 && disk.Path !== "/dev");
     };
   }
 }
