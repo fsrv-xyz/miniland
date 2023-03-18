@@ -144,7 +144,7 @@ func UsageSSEHandlerBuilder() http.HandlerFunc {
 
 			// get free disk space
 			var stat unix.Statfs_t
-			unix.Statfs("/", &stat)
+			unix.Statfs("/tmp/", &stat)
 
 			// send load average
 			events <- Event{Message: struct {
