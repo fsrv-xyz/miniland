@@ -14,7 +14,7 @@
         <td class="head">Filesystem:</td>
         <td class="content">
           {{ disk.used }} / {{ disk.total }} MiB
-          <progress max="100" text="lol" :value=disk.percent>{{ disk.percent }}%</progress>
+          <progress max="100" :value=disk.percent>{{ disk.percent }}%</progress>
         </td>
       </tr>
     </table>

@@ -146,17 +146,47 @@ func UsageSSEHandlerBuilder() http.HandlerFunc {
 			var stat unix.Statfs_t
 			unix.Statfs("/", &stat)
 
+			type Filesystem struct {
+				Path  string
+				Total uint64
+				Used  uint64
+			}
+
+			var filesystems []Filesystem
+
+			// get a list of all mounted filesystems from /proc/mounts
+			mounts, _ := os.ReadFile("/proc/mounts")
+			for _, mount := range strings.Split(string(mounts), "\n") {
+				if !strings.Contains(mount, " /") {
+					continue
+				}
+				parts := strings.Split(mount, " ")
+				if len(parts) < 2 {
+					continue
+				}
+				var stat unix.Statfs_t
+				unix.Statfs(parts[1], &stat)
+
+				filesystems = append(filesystems, Filesystem{
+					Path:  parts[1],
+					Total: bToMb(stat.Blocks * uint64(stat.Bsize)),
+					Used:  bToMb((stat.Blocks - stat.Bfree) * uint64(stat.Bsize)),
+				})
+			}
+
 			// send data
 			events <- Event{Message: struct {
-				LoadAvg   string `json:"loadavg"`
-				MemUsed   uint64 `json:"memused"`
-				DiskTotal uint64 `json:"disktotal"`
-				DiskUsed  uint64 `json:"diskused"`
+				LoadAvg     string       `json:"loadavg"`
+				MemUsed     uint64       `json:"memused"`
+				DiskTotal   uint64       `json:"disktotal"`
+				DiskUsed    uint64       `json:"diskused"`
+				Filesystems []Filesystem `json:"disks"`
 			}{
-				LoadAvg:   string(loadavg),
-				MemUsed:   bToMb(m.Sys),
-				DiskTotal: bToMb(stat.Blocks * uint64(stat.Bsize)),
-				DiskUsed:  bToMb((stat.Blocks - stat.Bfree) * uint64(stat.Bsize)),
+				LoadAvg:     string(loadavg),
+				MemUsed:     bToMb(m.Sys),
+				DiskTotal:   bToMb(stat.Blocks * uint64(stat.Bsize)),
+				DiskUsed:    bToMb((stat.Blocks - stat.Bfree) * uint64(stat.Bsize)),
+				Filesystems: filesystems,
 			}}
 		}
 	}()
