@@ -12,10 +12,14 @@
       </tr>
       <tr>
         <td class="head">Filesystem:</td>
-        <td class="content">{{ disk.used }} / {{ disk.total }} MiB</td>
+        <td class="content">
+          {{ disk.used }} / {{ disk.total }} MiB
+          <progress max="100" text="lol" :value=disk.percent>{{ disk.percent }}%</progress>
+        </td>
       </tr>
     </table>
   </div>
+
 </template>
 
 <script>
@@ -32,6 +36,7 @@ export default {
       disk: {
         "total": "n/a",
         "used": "n/a",
+        "percent": "n/a",
       },
     };
   },
@@ -43,6 +48,7 @@ export default {
       this.memory = payload.memused;
       this.disk.used = payload.diskused;
       this.disk.total = payload.disktotal;
+      this.disk.percent = this.disk.used / this.disk.total * 100;
     };
   }
 }
@@ -63,5 +69,8 @@ table {
   width: 50%;
   text-align: left;
   padding: 8px;
+}
+progress {
+  margin-left: 2%;
 }
 </style>
