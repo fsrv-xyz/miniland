@@ -11,8 +11,8 @@
         <td class="content">{{ memory }} MiB</td>
       </tr>
       <tr>
-        <td class="head">Filesystem Available:</td>
-        <td class="content">{{ disk.free }} MiB / {{ disk.total }} MiB</td>
+        <td class="head">Filesystem:</td>
+        <td class="content">{{ disk.free }} / {{ disk.total }} MiB</td>
       </tr>
     </table>
   </div>
@@ -31,7 +31,7 @@ export default {
       memory: "n/a",
       disk: {
         "total": "n/a",
-        "free": "n/a",
+        "used": "n/a",
       },
     };
   },
@@ -41,8 +41,7 @@ export default {
       const payload = JSON.parse(event.data).message;
       this.load = payload.loadavg;
       this.memory = payload.memused;
-     // this.disk = payload.diskavail;
-      this.disk.free = payload.diskavail;
+      this.disk.used = payload.diskused;
       this.disk.total = payload.disktotal;
     };
   }

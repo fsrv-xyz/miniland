@@ -142,21 +142,21 @@ func UsageSSEHandlerBuilder() http.HandlerFunc {
 			var m runtime.MemStats
 			runtime.ReadMemStats(&m)
 
-			// get free disk space
+			// get disk space information
 			var stat unix.Statfs_t
 			unix.Statfs("/", &stat)
 
-			// send load average
+			// send data
 			events <- Event{Message: struct {
 				LoadAvg   string `json:"loadavg"`
 				MemUsed   uint64 `json:"memused"`
-				DiskAvail uint64 `json:"diskavail"`
 				DiskTotal uint64 `json:"disktotal"`
+				DiskUsed  uint64 `json:"diskused"`
 			}{
 				LoadAvg:   string(loadavg),
 				MemUsed:   bToMb(m.Sys),
-				DiskAvail: bToMb(stat.Bavail * uint64(stat.Bsize)),
 				DiskTotal: bToMb(stat.Blocks * uint64(stat.Bsize)),
+				DiskUsed:  bToMb((stat.Blocks - stat.Bfree) * uint64(stat.Bsize)),
 			}}
 		}
 	}()
