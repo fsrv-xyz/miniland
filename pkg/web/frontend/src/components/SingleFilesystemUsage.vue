@@ -1,9 +1,11 @@
 <template>
-  <div>
-    {{ disk.path }}
-    {{ disk.used }}
-    {{ disk.total }}
-  </div>
+  <tr>
+    <td><b>{{ filesystem.path }}</b></td>
+    <td><progress class="progress" :value="filesystem.percent" max="100" :title="filesystem.percent+'%'">{{
+        filesystem.percent
+      }}%</progress></td>
+    <td>{{ filesystem.used }} / {{ filesystem.total }} MiB</td>
+  </tr>
 </template>
 
 <script>
@@ -15,19 +17,24 @@ export default {
   },
   data() {
     return {
-      disk: {
+      filesystem: {
         "path": "n/a",
         "total": "n/a",
         "used": "n/a",
-        "percent": "n/a",
+        "percent": 0,
       },
     };
   },
   created: function () {
-    this.disk.path = this.data.Path;
-    this.disk.used = this.data.Used;
-    this.disk.total = this.data.Total;
-    this.disk.percent = this.disk.Used / this.disk.Total * 100;
+    ({Path: this.filesystem.path, Used: this.filesystem.used, Total: this.filesystem.total} = this.data);
+    this.filesystem.percent = (this.filesystem.used / this.filesystem.total * 100).toFixed(2);
   }
 }
 </script>
+
+<style scoped>
+td {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+</style>

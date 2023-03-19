@@ -142,16 +142,11 @@ func UsageSSEHandlerBuilder() http.HandlerFunc {
 			var m runtime.MemStats
 			runtime.ReadMemStats(&m)
 
-			// get disk space information
-			var stat unix.Statfs_t
-			unix.Statfs("/", &stat)
-
 			type Filesystem struct {
-				Path  string
-				Total uint64
-				Used  uint64
+				Path  string `json:"path"`
+				Total uint64 `json:"total"`
+				Used  uint64 `json:"used"`
 			}
-
 			var filesystems []Filesystem
 
 			// get a list of all mounted filesystems from /proc/mounts
@@ -178,14 +173,10 @@ func UsageSSEHandlerBuilder() http.HandlerFunc {
 			events <- Event{Message: struct {
 				LoadAvg     string       `json:"loadavg"`
 				MemUsed     uint64       `json:"memused"`
-				DiskTotal   uint64       `json:"disktotal"`
-				DiskUsed    uint64       `json:"diskused"`
-				Filesystems []Filesystem `json:"disks"`
+				Filesystems []Filesystem `json:"filesystems"`
 			}{
 				LoadAvg:     string(loadavg),
 				MemUsed:     bToMb(m.Sys),
-				DiskTotal:   bToMb(stat.Blocks * uint64(stat.Bsize)),
-				DiskUsed:    bToMb((stat.Blocks - stat.Bfree) * uint64(stat.Bsize)),
 				Filesystems: filesystems,
 			}}
 		}

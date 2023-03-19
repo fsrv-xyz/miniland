@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2>{{ title }}</h2>
-    <table>
+    <table class="root_table">
       <tr>
         <td class="head">Load:</td>
         <td class="content">{{ load }}</td>
@@ -11,9 +11,11 @@
         <td class="content">{{ memory }} MiB</td>
       </tr>
       <tr>
-        <td class="head">Filesystem:</td>
+        <td class="head">Filesystems:</td>
         <td class="content">
-          <SingleFilesystemUsage v-for="disk in disks" :key="disk.path" :data="disk"/>
+          <table>
+            <SingleFilesystemUsage v-for="disk in filesystems" :key="disk.path" :data="disk"/>
+          </table>
         </td>
       </tr>
     </table>
@@ -37,23 +39,24 @@ export default {
       eventClient: null,
       load: "n/a",
       memory: "n/a",
-      disks: [],
+      filesystems: [],
     };
   },
   created: function () {
-    this.eventClient = new EventSource("https://miniland.wwwtest.org/frontend/sse/usage");
+    this.eventClient = new EventSource("/frontend/sse/usage");
+    //this.eventClient = new EventSource("https://miniland.wwwtest.org/frontend/sse/usage");
     this.eventClient.onmessage = (event) => {
       const payload = JSON.parse(event.data).message;
       this.load = payload.loadavg;
       this.memory = payload.memused;
-      this.disks = payload.disks.filter(disk => disk.Total !== 0 && disk.Path !== "/dev");
+      this.filesystems = payload.filesystems.filter(disk => disk.total !== 0 && disk.path !== "/dev");
     };
   }
 }
 </script>
 
 <style scoped>
-table {
+.root_table {
   border-collapse: collapse;
   width: 100%;
   position: center;
@@ -67,8 +70,5 @@ table {
   width: 50%;
   text-align: left;
   padding: 8px;
-}
-progress {
-  margin-left: 2%;
 }
 </style>
