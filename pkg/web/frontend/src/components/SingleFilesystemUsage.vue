@@ -26,7 +26,7 @@ export default {
     };
   },
   created: function () {
-    ({Path: this.filesystem.path, Used: this.filesystem.used, Total: this.filesystem.total} = this.data);
+    ({path: this.filesystem.path, used: this.filesystem.used, total: this.filesystem.total} = this.data);
     this.filesystem.percent = (this.filesystem.used / this.filesystem.total * 100).toFixed(2);
   }
 }

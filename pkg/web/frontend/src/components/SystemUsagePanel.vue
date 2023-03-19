@@ -44,12 +44,11 @@ export default {
   },
   created: function () {
     this.eventClient = new EventSource("/frontend/sse/usage");
-    //this.eventClient = new EventSource("https://miniland.wwwtest.org/frontend/sse/usage");
     this.eventClient.onmessage = (event) => {
       const payload = JSON.parse(event.data).message;
       this.load = payload.loadavg;
       this.memory = payload.memused;
-      this.filesystems = payload.filesystems.filter(disk => disk.total !== 0 && disk.path !== "/dev");
+      this.filesystems = payload.filesystems.filter(filesystem => filesystem.total !== 0 && filesystem.path !== "/dev");
     };
   }
 }
