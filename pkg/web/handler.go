@@ -12,6 +12,8 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+
+	"golang.org/x/sys/unix"
 )
 
 func apiAddressesHandler(response http.ResponseWriter, request *http.Request) {
@@ -140,13 +142,42 @@ func UsageSSEHandlerBuilder() http.HandlerFunc {
 			var m runtime.MemStats
 			runtime.ReadMemStats(&m)
 
-			// send load average
+			type Filesystem struct {
+				Path  string `json:"path"`
+				Total uint64 `json:"total"`
+				Used  uint64 `json:"used"`
+			}
+			var filesystems []Filesystem
+
+			// get a list of all mounted filesystems from /proc/mounts
+			mounts, _ := os.ReadFile("/proc/mounts")
+			for _, mount := range strings.Split(string(mounts), "\n") {
+				if !strings.Contains(mount, " /") {
+					continue
+				}
+				parts := strings.Split(mount, " ")
+				if len(parts) < 2 {
+					continue
+				}
+				var stat unix.Statfs_t
+				unix.Statfs(parts[1], &stat)
+
+				filesystems = append(filesystems, Filesystem{
+					Path:  parts[1],
+					Total: bToMb(stat.Blocks * uint64(stat.Bsize)),
+					Used:  bToMb((stat.Blocks - stat.Bfree) * uint64(stat.Bsize)),
+				})
+			}
+
+			// send data
 			events <- Event{Message: struct {
-				LoadAvg string `json:"loadavg"`
-				MemUsed uint64 `json:"memused"`
+				LoadAvg     string       `json:"loadavg"`
+				MemUsed     uint64       `json:"memused"`
+				Filesystems []Filesystem `json:"filesystems"`
 			}{
-				LoadAvg: string(loadavg),
-				MemUsed: bToMb(m.Sys),
+				LoadAvg:     string(loadavg),
+				MemUsed:     bToMb(m.Sys),
+				Filesystems: filesystems,
 			}}
 		}
 	}()
