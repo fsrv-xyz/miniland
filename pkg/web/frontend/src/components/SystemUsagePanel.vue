@@ -14,7 +14,7 @@
         <td class="head">Filesystems:</td>
         <td class="content">
           <table>
-            <SingleFilesystemUsage v-for="disk in filesystems" :key="disk.path" :data="disk"/>
+            <SingleFilesystemUsage v-for="filesystem in filesystems" :key="filesystem.path" :data="filesystem"/>
           </table>
         </td>
       </tr>
