@@ -121,27 +121,32 @@ rollout testvm:
   tags:
     - proxmox-runner-dro1
   script:
-    - cp output.iso /var/lib/vz/template/iso/output-${CI_PIPELINE_ID}.iso
-    - qm create ${CI_PIPELINE_ID} --cdrom local:iso/output-${CI_PIPELINE_ID}.iso --name "miniland-review-${CI_PIPELINE_ID}" --ostype l26 --memory 2048 --net0 virtio,bridge=vmbr0
-    - qm start ${CI_PIPELINE_ID}
+    - export VMID=$(bash assets/scripts/string2vmid.sh "${CI_COMMIT_REF_NAME}")
+    - echo "VMID:${VMID}"
+    - pvesh get /cluster/nextid -vmid "${VMID}" >/dev/null || (qm stop "${VMID}" ; qm destroy "${VMID}")
+    - cp output.iso /var/lib/vz/template/iso/output-${VMID}.iso
+    - qm create ${VMID} --cdrom local:iso/output-${VMID}.iso --name "miniland-review-${VMID}" --ostype l26 --memory 2048 --cores 2 --net0 virtio,bridge=vmbr0
+    - qm start "${VMID}"
   environment:
-    name: review/${CI_COMMIT_REF_SLUG}
+    name: review/${CI_COMMIT_SHA}
     on_stop: remove testvm
     action: start
 
 remove testvm:
   stage: integration-test
-  needs:
-    - rollout testvm
   tags:
     - proxmox-runner-dro1
   when: manual
+  variables:
+    GIT_STRATEGY: none
   environment:
-    name: review/${CI_COMMIT_REF_SLUG}
+    name: review/${CI_COMMIT_SHA}
     action: stop
+  before_script:
+    - export VMID=$(bash assets/scripts/string2vmid.sh "${CI_COMMIT_REF_NAME}")
   script:
-    - qm stop ${CI_PIPELINE_ID}
-    - qm destroy ${CI_PIPELINE_ID}
+    - qm stop ${VMID}
+    - qm destroy ${VMID}
 
 .testvm_defaults:
   image: archlinux:latest
@@ -165,6 +170,8 @@ network connectivity:
 web server connectivity:
   extends: .testvm_defaults
   image: curlimages/curl:latest
+  variables:
+    GIT_STRATEGY: none
   needs:
     - network connectivity
   timeout: 10m
@@ -174,6 +181,8 @@ web server connectivity:
 prometheus server connectivity:
   extends: .testvm_defaults
   image: curlimages/curl:latest
+  variables:
+    GIT_STRATEGY: none
   needs:
     - network connectivity
   timeout: 10m
