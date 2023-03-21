@@ -13,6 +13,14 @@ jsonlint:
       find . -not -path './.git/*' -name '*.json' -type f -print0 |
       parallel --will-cite -k -0 -n1 jsonlint -q
 
+shellcheck:
+  stage: test
+  image: registry.gitlab.com/pipeline-components/shellcheck:latest
+  script:
+    - |
+      find . -not -path './.git/*' -name '*.sh' -type f -print0 |
+      parallel --will-cite -k -0 -n1 shellcheck -x
+
 .go_template_defaults:
   stage: test
 .semver_template_defaults:
@@ -123,10 +131,21 @@ rollout testvm:
   script:
     - export VMID=$(bash assets/scripts/string2vmid.sh "${CI_COMMIT_REF_NAME}")
     - echo "VMID:${VMID}"
+    - echo "VMID=${VMID}" > review.env
     - pvesh get /cluster/nextid -vmid "${VMID}" >/dev/null || (qm stop "${VMID}" ; qm destroy "${VMID}")
     - cp output.iso /var/lib/vz/template/iso/output-${VMID}.iso
-    - qm create ${VMID} --cdrom local:iso/output-${VMID}.iso --name "miniland-review-${VMID}" --ostype l26 --memory 2048 --cores 2 --net0 virtio,bridge=vmbr0
+    - qm create ${VMID}
+      --cdrom local:iso/output-${VMID}.iso
+      --name "miniland-review-${VMID}"
+      --ostype l26
+      --memory 2048
+      --cores 2
+      --net0 virtio,bridge=vmbr0
+      --description "Pipeline = ${CI_PIPELINE_URL}<br>Branch = ${CI_COMMIT_REF_NAME}<br>Commit = ${CI_COMMIT_SHA}"
     - qm start "${VMID}"
+  artifacts:
+    reports:
+      dotenv: review.env
   environment:
     name: review/${CI_COMMIT_SHA}
     on_stop: remove testvm
@@ -136,17 +155,18 @@ remove testvm:
   stage: integration-test
   tags:
     - proxmox-runner-dro1
-  when: manual
+  needs:
+    - rollout testvm
   variables:
     GIT_STRATEGY: none
+  when: manual
   environment:
     name: review/${CI_COMMIT_SHA}
     action: stop
-  before_script:
-    - export VMID=$(bash assets/scripts/string2vmid.sh "${CI_COMMIT_REF_NAME}")
   script:
     - qm stop ${VMID}
     - qm destroy ${VMID}
+    - rm /var/lib/vz/template/iso/output-${VMID}.iso
 
 .testvm_defaults:
   image: archlinux:latest
