@@ -40,9 +40,11 @@ lint-frontend:
     paths:
       - pkg/web/frontend/dist/
 
-build-frontend:
+build frontend:
   stage: build
   image: node:latest
+  needs:
+    - lint-frontend
   script:
     - cd pkg/web/frontend
     - npm install
@@ -56,7 +58,7 @@ build-frontend:
     paths:
       - pkg/web/frontend/dist/
 
-build-initrd:
+build initrd:
   stage: build
   image: archlinux:base
   before_script:
@@ -65,7 +67,7 @@ build-initrd:
     - pacman -Syy --noconfirm base-devel rsync wget go gzip cpio
     - cp -a /var/cache/pacman/pkg/* cache/ >/dev/null
   needs:
-    - build-frontend
+    - build frontend
   script:
     - make build
   cache:
@@ -76,29 +78,80 @@ build-initrd:
     paths:
       - rootfs.cpio.gz
 
-TestVM rollout:
+download kernel:
+  image: archlinux:latest
+  stage: integration-test
+  variables:
+    JOB_ID: "28890"
+  script:
+    - pacman -Syy --noconfirm wget
+    - wget https://ref.ci/fsrvcorp/miniland/kernel/-/jobs/${JOB_ID}/artifacts/raw/linux/arch/x86/boot/bzImage
+  artifacts:
+    paths:
+      - bzImage
+    expire_in: 1 day
+
+build iso image:
+  image: archlinux:base
   stage: integration-test
   needs:
-    - build-initrd
-  tags:
-    - miniland-vm-runner
+    - build initrd
+    - download kernel
+  before_script:
+    - pacman -Syy --noconfirm cdrkit wget
   script:
-    - sudo cp -av rootfs.cpio.gz /proj/initrd/${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}.cpio.gz
-    - sudo virsh destroy Miniland || true
-    - sudo virsh dumpxml Miniland > /tmp/Miniland.xml
-    - xmlstarlet ed -u domain/os/initrd -v /proj/initrd/${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}.cpio.gz /tmp/Miniland.xml > /tmp/new.xml
-    - sudo virsh undefine Miniland
-    - sudo virsh define /tmp/new.xml
-    - sudo virsh start Miniland
+    - mkdir -p CD_root/isolinux
+    - cp rootfs.cpio.gz CD_root/initrd
+    - cp bzImage CD_root/bzImage
+    - wget https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/6.xx/syslinux-6.03.tar.gz
+    - tar -xzf syslinux-6.03.tar.gz
+    - cp assets/isofs/{isolinux.cfg,boot.txt} CD_root/isolinux/
+    - cp syslinux-6.03/bios/core/isolinux.bin CD_root/isolinux/
+    - cp syslinux-6.03/bios/com32/elflink/ldlinux/ldlinux.c32 CD_root/isolinux/
+    - mkisofs -o output.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table CD_root
+  artifacts:
+    paths:
+      - output.iso
+    expire_in: 1 day
+
+rollout testvm:
+  stage: integration-test
+  needs:
+    - build iso image
+  tags:
+    - proxmox-runner-dro1
+  script:
+    - cp output.iso /var/lib/vz/template/iso/output-${CI_PIPELINE_ID}.iso
+    - qm create ${CI_PIPELINE_ID} --cdrom local:iso/output-${CI_PIPELINE_ID}.iso --name "miniland-review-${CI_PIPELINE_ID}" --ostype l26 --memory 2048 --net0 virtio,bridge=vmbr0
+    - qm start ${CI_PIPELINE_ID}
+  environment:
+    name: review/${CI_COMMIT_REF_SLUG}
+    on_stop: remove testvm
+    action: start
+
+remove testvm:
+  stage: integration-test
+  needs:
+    - rollout testvm
+  tags:
+    - proxmox-runner-dro1
+  when: manual
+  environment:
+    name: review/${CI_COMMIT_REF_SLUG}
+    action: stop
+  script:
+    - qm stop ${CI_PIPELINE_ID}
+    - qm destroy ${CI_PIPELINE_ID}
 
 .testvm_defaults:
+  image: archlinux:latest
   stage: integration-test
+  tags:
+    - kubernetes-runner-dro1
   variables:
     TESTVM_IP: 100.64.70.93
   needs:
-    - TestVM rollout
-  tags:
-    - miniland-vm-runner
+    - rollout testvm
 
 network connectivity:
   extends: .testvm_defaults
@@ -111,6 +164,7 @@ network connectivity:
 
 web server connectivity:
   extends: .testvm_defaults
+  image: curlimages/curl:latest
   needs:
     - network connectivity
   timeout: 10m
@@ -119,6 +173,7 @@ web server connectivity:
 
 prometheus server connectivity:
   extends: .testvm_defaults
+  image: curlimages/curl:latest
   needs:
     - network connectivity
   timeout: 10m
