@@ -147,9 +147,8 @@ rollout testvm:
     reports:
       dotenv: review.env
   environment:
-    name: review/${CI_COMMIT_SHA}
+    name: review/${CI_COMMIT_REF_NAME}
     on_stop: remove testvm
-    action: start
 
 remove testvm:
   stage: integration-test
@@ -161,7 +160,7 @@ remove testvm:
     GIT_STRATEGY: none
   when: manual
   environment:
-    name: review/${CI_COMMIT_SHA}
+    name: review/${CI_COMMIT_REF_NAME}
     action: stop
   script:
     - qm stop ${VMID}
