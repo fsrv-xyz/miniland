@@ -1,35 +1,42 @@
 <template>
   <tr>
-    <td><b>{{ filesystem.path }}</b></td>
-    <td><progress class="progress" :value="filesystem.percent" max="100" :title="filesystem.percent+'%'">{{
-        filesystem.percent
-      }}%</progress></td>
-    <td>{{ filesystem.used }} / {{ filesystem.total }} MiB</td>
+    <td><b>{{ data.path !== "" ? data.path : "n/a" }}</b></td>
+    <td>
+      <progress :title="(percent !== 0 ? percent : 'n/a') + '%'" :value="percent" class="progress" max="100"></progress>
+    </td>
+    <td>{{ data.used }} / {{ data.total }} MiB</td>
   </tr>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, computed } from 'vue';
 
-export default {
-  name: 'SystemUsagePanel',
+interface Filesystem {
+  path: string;
+  total: number;
+  used: number;
+}
+
+export default defineComponent({
   props: {
-    data: {},
+    data: {
+      type: Object as () => Filesystem,
+      required: true,
+    },
   },
-  data() {
+  setup(props) {
+    const percent = computed(() => {
+      if (!props.data.total || props.data.total === 0) {
+        return 0;
+      }
+      return +(((props.data.used || 0) / props.data.total) * 100).toFixed(2);
+    });
+
     return {
-      filesystem: {
-        "path": "n/a",
-        "total": "n/a",
-        "used": "n/a",
-        "percent": 0,
-      },
+      percent,
     };
   },
-  created: function () {
-    ({path: this.filesystem.path, used: this.filesystem.used, total: this.filesystem.total} = this.data);
-    this.filesystem.percent = (this.filesystem.used / this.filesystem.total * 100).toFixed(2);
-  }
-}
+});
 </script>
 
 <style scoped>
