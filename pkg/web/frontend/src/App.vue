@@ -1,17 +1,19 @@
 <template>
-  <img height="128" width="128" alt="Miniland Logo" src="./assets/logo.png">
+  <img alt="Miniland Logo" height="128" src="./assets/logo.png" width="128">
   <h1>Miniland</h1>
   <SystemUsagePanel title="System usage"/>
 </template>
 
-<script>
-import SystemUsagePanel from './components/SystemUsagePanel.vue'
+<script lang="ts">
+import {Options, Vue} from 'vue-class-component';
+import SystemUsagePanel from "@/components/SystemUsagePanel.vue";
 
-export default {
-  name: 'App',
+@Options({
   components: {
     SystemUsagePanel,
-  }
+  },
+})
+export default class App extends Vue {
 }
 </script>
 

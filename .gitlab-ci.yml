@@ -56,7 +56,7 @@ build frontend:
   script:
     - cd pkg/web/frontend
     - npm install
-    - npm run build
+    - NODE_ENV=production npm run build
   cache:
     key: $CI_COMMIT_REF_SLUG
     paths:
@@ -132,7 +132,7 @@ rollout testvm:
     - export VMID=$(bash assets/scripts/string2vmid.sh "${CI_COMMIT_REF_NAME}")
     - echo "VMID:${VMID}"
     - echo "VMID=${VMID}" > review.env
-    - pvesh get /cluster/nextid -vmid "${VMID}" >/dev/null || (qm stop "${VMID}" ; qm destroy "${VMID}")
+    - pvesh get /cluster/nextid -vmid "${VMID}" >/dev/null 2>/dev/null || (qm stop "${VMID}" ; qm destroy "${VMID}")
     - cp output.iso /var/lib/vz/template/iso/output-${VMID}.iso
     - qm create ${VMID}
       --cdrom local:iso/output-${VMID}.iso
