@@ -14,6 +14,7 @@ import (
 
 	"ref.ci/fsrvcorp/miniland/userland/internal/cosmetic"
 	"ref.ci/fsrvcorp/miniland/userland/internal/filesystem"
+	"ref.ci/fsrvcorp/miniland/userland/internal/metrics"
 	"ref.ci/fsrvcorp/miniland/userland/internal/parser"
 	"ref.ci/fsrvcorp/miniland/userland/internal/power"
 	"ref.ci/fsrvcorp/miniland/userland/internal/sysctl"
@@ -107,6 +108,7 @@ func main() {
 
 	zlog.Info().Msg("starting web server")
 	go web.Start()
+	go metrics.ServeMetrics("[::1]:9101")
 
 	zlog.Info().Msg("starting services")
 	services, err := service.DiscoverServices()
