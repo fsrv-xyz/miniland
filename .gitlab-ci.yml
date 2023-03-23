@@ -142,9 +142,7 @@ rollout testvm:
       --cores 2
       --net0 virtio,bridge=vmbr0
       --description "Pipeline = ${CI_PIPELINE_URL}<br>Branch = ${CI_COMMIT_REF_NAME}<br>Commit = ${CI_COMMIT_SHA}"
-    - if [ "${CI_COMMIT_BRANCH}" != "${CI_DEFAULT_BRANCH}" ]; then
-        qm start "${VMID}"
-      fi
+    - if [ "${CI_COMMIT_BRANCH}" != "${CI_DEFAULT_BRANCH}" ]; then qm start "${VMID}"; fi
   artifacts:
     reports:
       dotenv: review.env
