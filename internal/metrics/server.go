@@ -13,5 +13,8 @@ func serveMetricsHandler() http.Handler {
 }
 
 func ServeMetrics(addr string) {
-	http.ListenAndServe(addr, serveMetricsHandler())
+	err := http.ListenAndServe(addr, serveMetricsHandler())
+	if err != nil {
+		return
+	}
 }
