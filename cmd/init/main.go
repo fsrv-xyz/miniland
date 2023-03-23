@@ -29,7 +29,7 @@ func mountfs() error {
 			Target: "/tmp",
 			Fstype: filesystem.TMPFS,
 			Flags:  syscall.MS_NOSUID | syscall.MS_NODEV | syscall.MS_RELATIME,
-			Data:   "size=200M",
+			Data:   "size=20M",
 		},
 		{
 			Source: filesystem.TMPFS,
