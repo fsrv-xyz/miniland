@@ -32,6 +32,13 @@ func mountfs() error {
 			Data:   "size=200M",
 		},
 		{
+			Source: filesystem.TMPFS,
+			Target: "/prometheus",
+			Fstype: filesystem.TMPFS,
+			Flags:  syscall.MS_NOSUID | syscall.MS_NODEV | syscall.MS_RELATIME,
+			Data:   "size=200M",
+		},
+		{
 			Source: filesystem.DEVTMPFS,
 			Target: "/dev",
 			Fstype: filesystem.DEVTMPFS,
@@ -40,11 +47,6 @@ func mountfs() error {
 			Source: filesystem.DEVPTS,
 			Target: "/dev/pts",
 			Fstype: filesystem.DEVPTS,
-		},
-		{
-			Source: filesystem.PROC,
-			Target: "/proc",
-			Fstype: filesystem.PROC,
 		},
 		{
 			Source: filesystem.PROC,
