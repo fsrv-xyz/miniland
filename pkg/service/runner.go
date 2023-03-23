@@ -5,7 +5,10 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
 	zlog "github.com/rs/zerolog/log"
+
+	"ref.ci/fsrvcorp/miniland/userland/internal/metrics"
 )
 
 func (s *Service) Start() error {
@@ -34,10 +37,13 @@ func (s *Service) Start() error {
 		Msg("Started service")
 
 	go NewWatchdog(cmd).Wait(func(exitError error) {
+		metrics.ServiceState.With(prometheus.Labels{metrics.LabelServiceIdentifier: s.Identifier}).Set(float64(metrics.ServiceStateStopped))
+		metrics.ServiceRestarts.With(prometheus.Labels{metrics.LabelServiceIdentifier: s.Identifier}).Inc()
 		<-time.After(5 * time.Second)
 		s.Start()
 	})
 
+	metrics.ServiceState.With(prometheus.Labels{metrics.LabelServiceIdentifier: s.Identifier}).Set(float64(metrics.ServiceStateRunning))
 	return nil
 }
 
@@ -45,5 +51,6 @@ func (s *Service) Stop() error {
 	if s.cmd == nil {
 		return nil
 	}
+	metrics.ServiceState.With(prometheus.Labels{metrics.LabelServiceIdentifier: s.Identifier}).Set(float64(metrics.ServiceStateStopped))
 	return (s.cmd).Process.Kill()
 }

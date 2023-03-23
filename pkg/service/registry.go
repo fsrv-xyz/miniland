@@ -5,6 +5,10 @@ import (
 	"os"
 	"path"
 	"strings"
+
+	"github.com/prometheus/client_golang/prometheus"
+
+	"ref.ci/fsrvcorp/miniland/userland/internal/metrics"
 )
 
 const ServiceConfigDir = "/etc/services/"
@@ -35,9 +39,13 @@ func DiscoverServices() ([]Service, error) {
 		}
 
 		services = append(services, sev)
+		metrics.ServiceState.With(prometheus.Labels{metrics.LabelServiceIdentifier: sev.Identifier}).Set(float64(metrics.ServiceStateDefined))
 
 		fileDescriptor.Close()
 	}
+
+	// Update metrics
+	metrics.ServicesDefined.Set(float64(len(services)))
 
 	return services, nil
 }
