@@ -1,7 +1,7 @@
 <template>
   <tr>
     <td><b>{{ data.path !== "" ? data.path : "n/a" }}</b></td>
-    <td>
+    <td class="progress-column">
       <progress :title="(percent !== 0 ? percent : 'n/a') + '%'" :value="percent" class="progress" max="100"></progress>
     </td>
     <td>{{ data.used }} / {{ data.total }} MiB</td>
@@ -43,5 +43,10 @@ export default defineComponent({
 td {
   padding-left: 5px;
   padding-right: 5px;
+}
+@media screen and (max-width: 600px){
+  .progress-column{
+    display: none;
+  }
 }
 </style>

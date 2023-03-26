@@ -81,18 +81,20 @@ export default class SystemUsagePanel extends Vue {
 </script>
 
 <style scoped>
+tr {
+  border-bottom: 1px solid #ddd;
+  white-space: nowrap;
+}
 .root_table {
   border-collapse: collapse;
   width: 100%;
   margin: 0 auto;
 }
 .head {
-  width: 50%;
-  text-align: right;
+  text-align: left;
   font-weight: bold;
 }
 .content {
-  width: 50%;
   text-align: left;
   padding: 8px;
 }
