@@ -3,5 +3,9 @@
   "command": "/bin/stats/node_exporter",
   "arguments": [
     "--web.listen-address=[::1]:9100"
-  ]
+  ],
+  "owner": {
+    "uid": 100,
+    "gid": 100
+  }
 }

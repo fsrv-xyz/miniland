@@ -18,8 +18,8 @@ import (
 	"ref.ci/fsrvcorp/miniland/userland/internal/parser"
 	"ref.ci/fsrvcorp/miniland/userland/internal/power"
 	"ref.ci/fsrvcorp/miniland/userland/internal/sysctl"
+	"ref.ci/fsrvcorp/miniland/userland/pkg/linux/account"
 	"ref.ci/fsrvcorp/miniland/userland/pkg/service"
-	"ref.ci/fsrvcorp/miniland/userland/pkg/web"
 )
 
 func mountfs() error {
@@ -77,7 +77,7 @@ func init() {
 	os.Mkdir("/log", 0o766)
 
 	zlog.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).With().Timestamp().Logger().With().Caller().Logger()
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 
 }
 
@@ -107,9 +107,6 @@ func main() {
 	}
 
 	fmt.Println(parser.ParseCmdline())
-
-	zlog.Info().Msg("starting web server")
-	go web.Start()
 	go metrics.ServeMetrics("[::1]:9101")
 
 	zlog.Info().Msg("starting services")
@@ -117,11 +114,47 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	}
-	for _, svc := range services {
-		zlog.Info().Msgf("starting service %s", svc.Configuration.Name)
-		svc.Start()
+	for serviceIndex := range services {
+		zlog.Info().Msgf("starting service %s", services[serviceIndex].Configuration.Name)
+		services[serviceIndex].Start()
+	}
+	accountState := account.NewState()
+	zlog.Err(accountState.AddUser(
+		account.UserWithName("root"),
+		account.UserWithComment("root user"),
+		account.UserWithUid(0),
+		account.UserWithGid(0),
+		account.UserCreateGroup(
+			account.GroupWithName("root"),
+			account.GroupWithGid(0),
+			account.GroupWithMembers([]string{"root"}),
+		),
+	)).Msg("adding user")
+	zlog.Err(accountState.WriteFiles()).Msg("writing files")
+
+	shell := exec.Command("/bin/sh")
+	shell.Stdout = os.Stdout
+	shell.Stderr = os.Stderr
+	shell.Stdin = os.Stdin
+	if err := shell.Run(); err != nil {
+		log.Println(err)
 	}
 
-	// wait indefinitely
+	//reader := bufio.NewReader(os.Stdin)
+	//fmt.Println("Simple Shell")
+	//fmt.Println("---------------------")
+
+	//for {
+	//	fmt.Print("-> ")
+	//	text, _ := reader.ReadString('\n')
+	//	// convert CRLF to LF
+	//	text = strings.Replace(text, "\n", "", -1)
+
+	//	if strings.Compare("hi", text) == 0 {
+	//		fmt.Println("hello, Yourself")
+	//	}
+
+	//}
+
 	select {}
 }

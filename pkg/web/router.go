@@ -23,9 +23,9 @@ func setupRouter() *mux.Router {
 	return router
 }
 
-func Start() {
+func Start(address string) {
 	server := http.Server{
-		Addr:    ":8080",
+		Addr:    address,
 		Handler: setupRouter(),
 	}
 

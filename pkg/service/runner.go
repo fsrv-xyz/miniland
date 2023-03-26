@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"os/exec"
+	"syscall"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -11,8 +12,26 @@ import (
 	"ref.ci/fsrvcorp/miniland/userland/internal/metrics"
 )
 
+func (s *Service) DefaultWatchdogActionBuilder() WatchdogAction {
+	return func(exitError error) {
+		metrics.ServiceState.With(prometheus.Labels{metrics.LabelServiceIdentifier: s.Identifier}).Set(float64(metrics.ServiceStateStopped))
+		metrics.ServiceRestarts.With(prometheus.Labels{metrics.LabelServiceIdentifier: s.Identifier}).Inc()
+		<-time.After(5 * time.Second)
+
+		s.Start()
+	}
+}
+
 func (s *Service) Start() error {
 	cmd := exec.Command(s.Configuration.Command, s.Configuration.Arguments...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{}
+	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: s.Configuration.Owner.UId, Gid: s.Configuration.Owner.GId}
+
+	// add environment variables
+	for key, value := range s.Configuration.Environment {
+		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
+	}
+
 	s.logger = &Logger{}
 
 	stdout, err := cmd.StdoutPipe()
@@ -36,12 +55,7 @@ func (s *Service) Start() error {
 		Str("service", s.Identifier).
 		Msg("Started service")
 
-	go NewWatchdog(cmd).Wait(func(exitError error) {
-		metrics.ServiceState.With(prometheus.Labels{metrics.LabelServiceIdentifier: s.Identifier}).Set(float64(metrics.ServiceStateStopped))
-		metrics.ServiceRestarts.With(prometheus.Labels{metrics.LabelServiceIdentifier: s.Identifier}).Inc()
-		<-time.After(5 * time.Second)
-		s.Start()
-	})
+	go NewWatchdog(cmd).Wait(s.DefaultWatchdogActionBuilder())
 
 	metrics.ServiceState.With(prometheus.Labels{metrics.LabelServiceIdentifier: s.Identifier}).Set(float64(metrics.ServiceStateRunning))
 	return nil

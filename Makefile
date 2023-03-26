@@ -39,10 +39,20 @@ initrd_static_files:
 initrd_assemble:
 	cd ./stage; find . | cpio -vo -H newc | gzip > ../rootfs.cpio.gz; cd ..
 
+shell_prepare:
+	wget https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox -O stage/bin/busybox
+	chmod +x stage/bin/busybox
+	stage/bin/busybox --install stage/bin
+
+utils_prepare:
+	make -C cmd/utils/ OUTDIR=../../stage/sbin
+
 build: \
 	prepare_environment \
 	initrd_static_files \
 	stats_prepare \
+	shell_prepare \
+	utils_prepare \
 	prepare_ca_certificates \
 	initrd_binary_build \
 	networking_binary_build \

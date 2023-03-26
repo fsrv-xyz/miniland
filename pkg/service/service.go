@@ -19,7 +19,14 @@ func (s *Service) ReadConfiguration(reader io.Reader) error {
 }
 
 type Configuration struct {
-	Name      string   `json:"name" yaml:"name"`
-	Command   string   `json:"command" yaml:"command"`
-	Arguments []string `json:"arguments" yaml:"arguments"`
+	Name        string            `json:"name" yaml:"name"`
+	Owner       Owner             `json:"owner" yaml:"owner"`
+	Command     string            `json:"command" yaml:"command"`
+	Arguments   []string          `json:"arguments" yaml:"arguments"`
+	Environment map[string]string `json:"environment,omitempty" yaml:"environment,omitempty"`
+}
+
+type Owner struct {
+	UId uint32 `json:"uid" yaml:"uid"`
+	GId uint32 `json:"gid" yaml:"gid"`
 }
