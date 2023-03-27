@@ -1,8 +1,14 @@
 .PHONY: all
 all: build
 
+CACHE_DIR := $(shell pwd)/cache
+
+PROMETHEUS_VERSION := 2.42.0
+NODE_EXPORTER_VERSION := 1.5.0
+
+
 prepare_environment:
-	mkdir -p stage
+	mkdir -p stage $(CACHE_DIR)
 	rm -vf rootfs.cpio.gz || true
 
 cleanup_environment:
@@ -27,8 +33,15 @@ prepare_ca_certificates:
 stats_prepare:
 	mkdir -p stage/bin/stats
 	@$(eval TMP := $(shell mktemp -d))
-	wget -qO- https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-amd64.tar.gz | tar -xz -C $(TMP)
-	wget -qO- https://github.com/prometheus/prometheus/releases/download/v2.42.0/prometheus-2.42.0.linux-amd64.tar.gz | tar -xz -C $(TMP)
+
+	test -f $(CACHE_DIR)/node_exporter-$(NODE_EXPORTER_VERSION).linux-amd64.tar.gz || \
+    	wget -qO $(CACHE_DIR)/node_exporter-$(NODE_EXPORTER_VERSION).linux-amd64.tar.gz https://github.com/prometheus/node_exporter/releases/download/v$(NODE_EXPORTER_VERSION)/node_exporter-$(NODE_EXPORTER_VERSION).linux-amd64.tar.gz
+	@tar -xz -C $(TMP) -f $(CACHE_DIR)/node_exporter-$(NODE_EXPORTER_VERSION).linux-amd64.tar.gz
+
+	test -f $(CACHE_DIR)/prometheus-$(PROMETHEUS_VERSION).linux-amd64.tar.gz || \
+    	wget -qO $(CACHE_DIR)/prometheus-$(PROMETHEUS_VERSION).linux-amd64.tar.gz https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).linux-amd64.tar.gz
+	@tar -xz -C $(TMP) -f $(CACHE_DIR)/prometheus-$(PROMETHEUS_VERSION).linux-amd64.tar.gz
+
 	@cp -av $(TMP)/**/node_exporter stage/bin/stats/
 	@cp -av $(TMP)/**/prometheus stage/bin/stats/
 	@rm -rf $(TMP)
@@ -40,8 +53,9 @@ initrd_assemble:
 	cd ./stage; find . | cpio -vo -H newc | gzip > ../rootfs.cpio.gz; cd ..
 
 shell_prepare:
-	wget https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox -O stage/bin/busybox
-	chmod +x stage/bin/busybox
+	test -f $(CACHE_DIR)/busybox || \
+		wget https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox -O $(CACHE_DIR)/busybox
+	cp $(CACHE_DIR)/busybox stage/bin/busybox && chmod +x stage/bin/busybox
 	stage/bin/busybox --install stage/bin
 
 utils_prepare:
