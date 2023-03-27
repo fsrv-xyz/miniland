@@ -35,11 +35,11 @@ stats_prepare:
 	@$(eval TMP := $(shell mktemp -d))
 
 	test -f $(CACHE_DIR)/node_exporter-$(NODE_EXPORTER_VERSION).linux-amd64.tar.gz || \
-    	wget -qO $(CACHE_DIR)/node_exporter-$(NODE_EXPORTER_VERSION).linux-amd64.tar.gz https://github.com/prometheus/node_exporter/releases/download/v$(NODE_EXPORTER_VERSION)/node_exporter-$(NODE_EXPORTER_VERSION).linux-amd64.tar.gz
+		wget -qO $(CACHE_DIR)/node_exporter-$(NODE_EXPORTER_VERSION).linux-amd64.tar.gz https://github.com/prometheus/node_exporter/releases/download/v$(NODE_EXPORTER_VERSION)/node_exporter-$(NODE_EXPORTER_VERSION).linux-amd64.tar.gz
 	@tar -xz -C $(TMP) -f $(CACHE_DIR)/node_exporter-$(NODE_EXPORTER_VERSION).linux-amd64.tar.gz
 
 	test -f $(CACHE_DIR)/prometheus-$(PROMETHEUS_VERSION).linux-amd64.tar.gz || \
-    	wget -qO $(CACHE_DIR)/prometheus-$(PROMETHEUS_VERSION).linux-amd64.tar.gz https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).linux-amd64.tar.gz
+		wget -qO $(CACHE_DIR)/prometheus-$(PROMETHEUS_VERSION).linux-amd64.tar.gz https://github.com/prometheus/prometheus/releases/download/v$(PROMETHEUS_VERSION)/prometheus-$(PROMETHEUS_VERSION).linux-amd64.tar.gz
 	@tar -xz -C $(TMP) -f $(CACHE_DIR)/prometheus-$(PROMETHEUS_VERSION).linux-amd64.tar.gz
 
 	@cp -av $(TMP)/**/node_exporter stage/bin/stats/
