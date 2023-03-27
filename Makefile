@@ -5,6 +5,7 @@ CACHE_DIR := $(shell pwd)/cache
 
 PROMETHEUS_VERSION := 2.42.0
 NODE_EXPORTER_VERSION := 1.5.0
+BUSYBOX_VERSION := 1.35.0-x86_64-linux-musl
 
 
 prepare_environment:
@@ -54,8 +55,8 @@ initrd_assemble:
 
 shell_prepare:
 	test -f $(CACHE_DIR)/busybox || \
-		wget https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox -O $(CACHE_DIR)/busybox
-	cp $(CACHE_DIR)/busybox stage/bin/busybox && chmod +x stage/bin/busybox
+		wget -qO $(CACHE_DIR)/busybox-$(BUSYBOX_VERSION) https://busybox.net/downloads/binaries/$(BUSYBOX_VERSION)/busybox
+	cp $(CACHE_DIR)/busybox-$(BUSYBOX_VERSION) stage/bin/busybox && chmod +x stage/bin/busybox
 	stage/bin/busybox --install stage/bin
 
 utils_prepare:
@@ -72,12 +73,3 @@ build: \
 	networking_binary_build \
 	initrd_assemble \
 	cleanup_environment
-
-run: build
-	qemu-system-x86_64 \
-		-kernel bzImage \
-		-initrd rootfs.cpio.gz \
-		-m 1024 \
-		-smp 2 \
-		-net nic,model=e1000 \
-		-append "test=1d bla=fasel"
