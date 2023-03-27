@@ -7,11 +7,13 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
+	"syscall"
 
 	"golang.org/x/sys/unix"
 )
@@ -70,6 +72,8 @@ type Process struct {
 	Binary  string
 	State   string
 	Cmdline string
+	Uid     int
+	Gid     int
 }
 
 // Processes - List all running processes
@@ -109,6 +113,10 @@ func (p *Process) refresh() error {
 	if err != nil {
 		return err
 	}
+
+	fi, _ := os.Stat(path.Join("/proc", strconv.Itoa(p.Pid)))
+	p.Uid = int(fi.Sys().(*syscall.Stat_t).Uid)
+	p.Gid = int(fi.Sys().(*syscall.Stat_t).Gid)
 
 	data := string(dataBytes)
 	p.Cmdline = string(cmdlineBytes)
