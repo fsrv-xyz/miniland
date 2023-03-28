@@ -59,6 +59,26 @@ func apiFilesHandler(response http.ResponseWriter, request *http.Request) {
 
 func apiProcessesHandler(response http.ResponseWriter, request *http.Request) {
 	plist, _ := processes("/proc")
+
+	filterType := request.URL.Query().Get("type")
+	typeExist, _ := regexp.MatchString(`^(user|system)$`, filterType)
+	if !typeExist && filterType != "" {
+		response.WriteHeader(http.StatusBadRequest)
+		response.Write([]byte("Invalid type"))
+		return
+	}
+
+	// filter by type
+	if filterType != "" {
+		var filtered []Process
+		for _, p := range plist {
+			if p.Type == ProcessType(filterType) {
+				filtered = append(filtered, p)
+			}
+		}
+		plist = filtered
+	}
+
 	encoder := json.NewEncoder(response)
 	encoder.SetEscapeHTML(true)
 	encoder.SetIndent("", "  ")
@@ -74,7 +94,16 @@ type Process struct {
 	Cmdline string
 	Uid     int
 	Gid     int
+	Type    ProcessType
+	Comm    string
 }
+
+type ProcessType string
+
+const (
+	ProcessTypeUser   ProcessType = "user"
+	ProcessTypeSystem ProcessType = "system"
+)
 
 // Processes - List all running processes
 func processes(procdir string) ([]Process, error) {
@@ -104,6 +133,7 @@ func processes(procdir string) ([]Process, error) {
 func (p *Process) refresh() error {
 	statPath := fmt.Sprintf("/proc/%d/stat", p.Pid)
 	cmdlinePath := fmt.Sprintf("/proc/%d/cmdline", p.Pid)
+	commandPath := fmt.Sprintf("/proc/%d/comm", p.Pid)
 	exelinkPath := fmt.Sprintf("/proc/%d/exe", p.Pid)
 	dataBytes, err := os.ReadFile(statPath)
 	if err != nil {
@@ -113,6 +143,7 @@ func (p *Process) refresh() error {
 	if err != nil {
 		return err
 	}
+	p.Comm = func(n []byte, _ error) string { return strings.TrimSuffix(string(n), "\n") }(os.ReadFile(commandPath))
 
 	fi, _ := os.Stat(path.Join("/proc", strconv.Itoa(p.Pid)))
 	p.Uid = int(fi.Sys().(*syscall.Stat_t).Uid)
@@ -120,6 +151,8 @@ func (p *Process) refresh() error {
 
 	data := string(dataBytes)
 	p.Cmdline = string(cmdlineBytes)
+	p.Cmdline = strings.ReplaceAll(p.Cmdline, "\x00", " ")
+	p.Cmdline = strings.TrimSuffix(p.Cmdline, " ")
 
 	binStart := strings.IndexRune(data, '(') + 1
 	binEnd := strings.IndexRune(data[binStart:], ')')
@@ -130,6 +163,12 @@ func (p *Process) refresh() error {
 		"%s %d",
 		&p.State,
 		&p.PPid)
+
+	if p.Cmdline == "" {
+		p.Type = ProcessTypeSystem
+	} else {
+		p.Type = ProcessTypeUser
+	}
 
 	return err
 }
