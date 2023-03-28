@@ -1,7 +1,7 @@
 {
+  "$schema": "../../../assets/schema/service.json",
   "name": "frontend_server",
   "command": "/sbin/frontend_server",
-  "arguments": [],
   "owner": {
     "uid": 101,
     "gid": 101

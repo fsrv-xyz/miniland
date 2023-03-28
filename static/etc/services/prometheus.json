@@ -1,4 +1,5 @@
 {
+  "$schema": "../../../assets/schema/service.json",
   "name": "Prometheus",
   "command": "/bin/stats/prometheus",
   "arguments": [

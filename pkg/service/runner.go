@@ -26,6 +26,12 @@ func (s *Service) Start() error {
 	cmd := exec.Command(s.Configuration.Command, s.Configuration.Arguments...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{}
 	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: s.Configuration.Owner.UId, Gid: s.Configuration.Owner.GId}
+	cmd.SysProcAttr.Setsid = true
+
+	// set working directory if specified
+	if s.Configuration.RunDir != "" {
+		cmd.Dir = s.Configuration.RunDir
+	}
 
 	// add environment variables
 	for key, value := range s.Configuration.Environment {

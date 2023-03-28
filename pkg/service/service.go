@@ -24,6 +24,7 @@ type Configuration struct {
 	Command     string            `json:"command" yaml:"command"`
 	Arguments   []string          `json:"arguments" yaml:"arguments"`
 	Environment map[string]string `json:"environment,omitempty" yaml:"environment,omitempty"`
+	RunDir      string            `json:"run_dir,omitempty" yaml:"run_dir,omitempty"`
 }
 
 type Owner struct {
