@@ -89,10 +89,10 @@ download kernel:
   image: archlinux:latest
   stage: integration-test
   variables:
-    JOB_ID: "28890"
+    KERNEL_URL: "https://ref.ci/fsrvcorp/miniland/kernel/-/jobs/33444/artifacts/raw/linux/arch/x86/boot/bzImage"
   script:
-    - pacman -Syy --noconfirm wget
-    - wget https://ref.ci/fsrvcorp/miniland/kernel/-/jobs/${JOB_ID}/artifacts/raw/linux/arch/x86/boot/bzImage
+    - pacman -Syy --noconfirm wget >/dev/null 2>/dev/null
+    - wget "${KERNEL_URL}"
   artifacts:
     paths:
       - bzImage
@@ -143,6 +143,7 @@ rollout testvm:
       --memory 2048
       --cores 2
       --net0 virtio,bridge=vmbr0
+      --vga virtio
       --description "Pipeline = ${CI_PIPELINE_URL}<br>Branch = ${CI_COMMIT_REF_NAME}<br>Commit = ${CI_COMMIT_SHA}"
     - if [ "${CI_COMMIT_BRANCH}" != "${CI_DEFAULT_BRANCH}" ]; then qm start "${VMID}"; fi
   artifacts:
