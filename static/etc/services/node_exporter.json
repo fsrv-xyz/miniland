@@ -1,4 +1,5 @@
 {
+  "$schema": "../../../assets/schema/service.json",
   "name": "node_exporter",
   "command": "/bin/stats/node_exporter",
   "arguments": [

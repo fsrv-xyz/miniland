@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "additionalProperties": false,
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON schema for this file"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the service",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]*$",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "command": {
+      "type": "string",
+      "description": "Command to run",
+      "pattern": "^/.*$"
+    },
+    "run_dir": {
+      "type": "string",
+      "description": "Directory to run the command in",
+      "pattern": "^/.*$"
+    },
+    "arguments": {
+      "type": "array",
+      "description": "Arguments to the command",
+      "items": {
+        "type": "string"
+      }
+    },
+    "owner": {
+      "type": "object",
+      "description": "Owner description of the service",
+      "additionalProperties": false,
+      "properties": {
+        "uid": {
+          "type": "integer",
+          "description": "User ID of the owner",
+          "minimum": 0
+        },
+        "gid": {
+          "type": "integer",
+          "description": "Group ID of the owner",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "uid",
+        "gid"
+      ]
+    },
+    "environment": {
+      "type": "object",
+      "description": "Environment variables to set",
+      "patternProperties": {
+        ".*": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "name",
+    "command",
+    "owner"
+  ]
+}

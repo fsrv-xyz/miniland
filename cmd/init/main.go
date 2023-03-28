@@ -136,6 +136,9 @@ func main() {
 	shell.Stdout = os.Stdout
 	shell.Stderr = os.Stderr
 	shell.Stdin = os.Stdin
+	shell.SysProcAttr = &syscall.SysProcAttr{
+		Setsid: true,
+	}
 	if err := shell.Run(); err != nil {
 		log.Println(err)
 	}
