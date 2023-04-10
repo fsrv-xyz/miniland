@@ -2,7 +2,7 @@
   "routes": [
     {
       "destination": "0.0.0.0/0",
-      "gateway": "100.64.70.254"
+      "gateway": "100.64.70.253"
     },
     {
       "destination": "::/0",

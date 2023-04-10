@@ -27,6 +27,7 @@ func (s *Service) Start() error {
 	cmd.SysProcAttr = &syscall.SysProcAttr{}
 	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: s.Configuration.Owner.UId, Gid: s.Configuration.Owner.GId}
 	cmd.SysProcAttr.Setsid = true
+	cmd.SysProcAttr.Cloneflags = syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID
 
 	// set working directory if specified
 	if s.Configuration.RunDir != "" {
