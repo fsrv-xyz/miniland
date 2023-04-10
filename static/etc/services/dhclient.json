@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../assets/schema/service.json",
+  "name": "dhclient",
+  "command": "/sbin/dhclient",
+  "arguments": [
+    "eth0"
+  ],
+  "owner": {
+    "uid": 0,
+    "gid": 0
+  }
+}

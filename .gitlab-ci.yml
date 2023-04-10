@@ -89,7 +89,7 @@ download kernel:
   image: archlinux:latest
   stage: integration-test
   variables:
-    KERNEL_URL: "https://ref.ci/fsrvcorp/miniland/kernel/-/jobs/33444/artifacts/raw/linux/arch/x86/boot/bzImage"
+    KERNEL_URL: "https://ref.ci/fsrvcorp/miniland/kernel/-/jobs/34031/artifacts/raw/linux/arch/x86/boot/bzImage"
   script:
     - pacman -Syy --noconfirm wget >/dev/null 2>/dev/null
     - wget "${KERNEL_URL}"
