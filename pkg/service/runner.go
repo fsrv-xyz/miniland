@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"syscall"
@@ -18,11 +19,14 @@ func (s *Service) DefaultWatchdogActionBuilder() WatchdogAction {
 		metrics.ServiceRestarts.With(prometheus.Labels{metrics.LabelServiceIdentifier: s.Identifier}).Inc()
 		<-time.After(5 * time.Second)
 
+		s.Stop()
+
 		s.Start()
 	}
 }
 
 func (s *Service) Start() error {
+	s.context, s.contextCancelFunc = context.WithCancel(context.Background())
 	cmd := exec.Command(s.Configuration.Command, s.Configuration.Arguments...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{}
 	cmd.SysProcAttr.Credential = &syscall.Credential{Uid: s.Configuration.Owner.UId, Gid: s.Configuration.Owner.GId}
@@ -50,7 +54,8 @@ func (s *Service) Start() error {
 		return err
 	}
 	s.logger.Bind(stdout, stderr)
-	go s.logger.Listen(s.Identifier)
+
+	go s.logger.Listen(s.context, s.Identifier)
 
 	processStartError := cmd.Start()
 	if processStartError != nil {
@@ -71,6 +76,9 @@ func (s *Service) Start() error {
 func (s *Service) Stop() error {
 	if s.cmd == nil {
 		return nil
+	}
+	if s.contextCancelFunc != nil {
+		s.contextCancelFunc()
 	}
 	metrics.ServiceState.With(prometheus.Labels{metrics.LabelServiceIdentifier: s.Identifier}).Set(float64(metrics.ServiceStateStopped))
 	return (s.cmd).Process.Kill()

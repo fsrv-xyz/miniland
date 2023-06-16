@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"golang.org/x/sys/unix"
 )
@@ -226,6 +227,8 @@ func UsageSSEHandlerBuilder() http.HandlerFunc {
 				MemUsed:     bToMb(m.Sys),
 				Filesystems: filesystems,
 			}}
+
+			time.Sleep(500 * time.Millisecond)
 		}
 	}()
 

@@ -2,6 +2,7 @@ package service
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"io"
 	"log"
@@ -33,7 +34,7 @@ func (l *Logger) Bind(stdout, stderr io.ReadCloser) {
 	l.stderrInput = stderr
 }
 
-func (l *Logger) Listen(title string) {
+func (l *Logger) Listen(ctx context.Context, title string) {
 
 	stdoutChannel := readToChannel(l.stdoutInput)
 	stderrChannel := readToChannel(l.stderrInput)
@@ -46,6 +47,9 @@ func (l *Logger) Listen(title string) {
 
 	for {
 		select {
+		case <-ctx.Done():
+			logFile.Close()
+			return
 		case stdout := <-stdoutChannel:
 			outLog.Println(LogFmt{Timestamp: time.Now().Format(time.RFC3339), Level: "STDOUT", Message: stdout}.JsonString())
 		case stderr := <-stderrChannel:

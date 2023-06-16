@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"os/exec"
@@ -12,6 +13,9 @@ type Service struct {
 
 	cmd    *exec.Cmd
 	logger *Logger
+
+	context           context.Context
+	contextCancelFunc context.CancelFunc
 }
 
 func (s *Service) ReadConfiguration(reader io.Reader) error {
