@@ -3,9 +3,8 @@ package web
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
-	"time"
 )
 
 type Event struct {
@@ -14,25 +13,34 @@ type Event struct {
 
 func ServerSendEventsHandlerBuilder(events <-chan Event) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		flusher, ok := w.(http.Flusher)
+		if !ok {
+			http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)
+			return
+		}
+
+		// Set the necessary headers to allow SSE
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "keep-alive")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 
-		timeout := time.After(100 * time.Millisecond)
-		select {
-		case ev := <-events:
-			var buf bytes.Buffer
-			enc := json.NewEncoder(&buf)
-			enc.Encode(ev)
-			fmt.Fprintf(w, "data: %v\n\n", buf.String())
-		case <-timeout:
-			fmt.Fprintf(w, ": nothing to sent\n\n")
-		}
+		for event := range events {
+			buffer := bytes.NewBufferString("data: ")
 
-		if f, ok := w.(http.Flusher); ok {
-			f.Flush()
+			if err := json.NewEncoder(buffer).Encode(event); err != nil {
+				log.Println(err)
+				return
+			}
+			buffer.WriteString("\n\n")
+
+			if _, err := buffer.WriteTo(w); err != nil {
+				log.Println(err)
+				return
+			}
+
+			// Flush the data immediately instead of buffering it
+			flusher.Flush()
 		}
 	}
 }

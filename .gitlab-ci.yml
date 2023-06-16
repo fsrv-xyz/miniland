@@ -49,7 +49,7 @@ lint-frontend:
 
 build frontend:
   stage: integration-test
-  image: node:latest
+  image: node:20.0
   needs:
     - lint-frontend
   script:
