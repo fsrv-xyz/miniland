@@ -33,7 +33,7 @@ include:
 
 lint-frontend:
   stage: test
-  image: node:latest
+  image: node:latest@sha256:2f0b0c15f97441defa812268ee943bbfaaf666ea6cf7cac62ee3f127906b35c6
   script:
     - cd pkg/web/frontend
     - npm install
@@ -49,7 +49,7 @@ lint-frontend:
 
 build frontend:
   stage: integration-test
-  image: node:20.0
+  image: node:20.0@sha256:942fa0013e9adfbde06ad07433bdb0a67cc2ac0d5a3db38f12a9c8f710b41f1c
   needs:
     - lint-frontend
   script:
@@ -67,7 +67,7 @@ build frontend:
 
 build initrd:
   stage: integration-test
-  image: archlinux:base
+  image: archlinux:base@sha256:417c338ddd030f678ae1d5f7885cef7075d191434f98d2e9fc3d0ab10de9fc84
   before_script:
     - mkdir -p cache >/dev/null
     - cp -a cache/* /var/cache/pacman/pkg/ || true
@@ -86,7 +86,7 @@ build initrd:
       - rootfs.cpio.gz
 
 download kernel:
-  image: archlinux:latest
+  image: archlinux:latest@sha256:417c338ddd030f678ae1d5f7885cef7075d191434f98d2e9fc3d0ab10de9fc84
   stage: integration-test
   variables:
     KERNEL_URL: "https://ref.ci/fsrvcorp/miniland/kernel/-/jobs/34031/artifacts/raw/linux/arch/x86/boot/bzImage"
@@ -99,7 +99,7 @@ download kernel:
     expire_in: 1 day
 
 build iso image:
-  image: archlinux:base
+  image: archlinux:base@sha256:417c338ddd030f678ae1d5f7885cef7075d191434f98d2e9fc3d0ab10de9fc84
   stage: integration-test
   needs:
     - build initrd
@@ -171,7 +171,7 @@ remove testvm:
     - rm /var/lib/vz/template/iso/output-${VMID}.iso
 
 .testvm_defaults:
-  image: archlinux:latest
+  image: archlinux:latest@sha256:417c338ddd030f678ae1d5f7885cef7075d191434f98d2e9fc3d0ab10de9fc84
   stage: integration-test
   tags:
     - kubernetes-runner-dro1
@@ -191,7 +191,7 @@ network connectivity:
 
 web server connectivity:
   extends: .testvm_defaults
-  image: curlimages/curl:latest
+  image: curlimages/curl:latest@sha256:fcf8b68aa7af25898d21b47096ceb05678665ae182052283bd0d7128149db55f
   variables:
     GIT_STRATEGY: none
   needs:
@@ -202,7 +202,7 @@ web server connectivity:
 
 prometheus server connectivity:
   extends: .testvm_defaults
-  image: curlimages/curl:latest
+  image: curlimages/curl:latest@sha256:fcf8b68aa7af25898d21b47096ceb05678665ae182052283bd0d7128149db55f
   variables:
     GIT_STRATEGY: none
   needs:
