@@ -191,7 +191,7 @@ network connectivity:
 
 web server connectivity:
   extends: .testvm_defaults
-  image: curlimages/curl:latest@sha256:fcf8b68aa7af25898d21b47096ceb05678665ae182052283bd0d7128149db55f
+  image: curlimages/curl:latest@sha256:daf3f46a2639c1613b25e85c9ee4193af8a1d538f92483d67f9a3d7f21721827
   variables:
     GIT_STRATEGY: none
   needs:
@@ -202,7 +202,7 @@ web server connectivity:
 
 prometheus server connectivity:
   extends: .testvm_defaults
-  image: curlimages/curl:latest@sha256:fcf8b68aa7af25898d21b47096ceb05678665ae182052283bd0d7128149db55f
+  image: curlimages/curl:latest@sha256:daf3f46a2639c1613b25e85c9ee4193af8a1d538f92483d67f9a3d7f21721827
   variables:
     GIT_STRATEGY: none
   needs:
