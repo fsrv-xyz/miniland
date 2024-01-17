@@ -33,7 +33,7 @@ include:
 
 lint-frontend:
   stage: test
-  image: node:latest@sha256:ca1e0e5a87da404c488223e35dc7203c331e4c49c583616cc75a86ec13a43f3c
+  image: node:latest@sha256:b52feb864e3cbabee16d018ec35ce8cf69cb3ce9c70f71d3528789888ac77395
   script:
     - cd pkg/web/frontend
     - npm install
@@ -49,7 +49,7 @@ lint-frontend:
 
 build frontend:
   stage: integration-test
-  image: node:latest@sha256:ca1e0e5a87da404c488223e35dc7203c331e4c49c583616cc75a86ec13a43f3c
+  image: node:latest@sha256:b52feb864e3cbabee16d018ec35ce8cf69cb3ce9c70f71d3528789888ac77395
   needs:
     - lint-frontend
   script:
