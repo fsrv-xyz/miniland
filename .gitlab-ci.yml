@@ -67,7 +67,7 @@ build frontend:
 
 build initrd:
   stage: integration-test
-  image: archlinux:base@sha256:812644fa7bb7790deb91c55fb694461706103288dead4395694efad4b0bf0212
+  image: archlinux:base@sha256:8b0a7d7e22c2e78539406a37ba2a1eb431d31981be3d76e076f517d3b62204d0
   before_script:
     - mkdir -p cache >/dev/null
     - cp -a cache/* /var/cache/pacman/pkg/ || true
@@ -99,7 +99,7 @@ download kernel:
     expire_in: 1 day
 
 build iso image:
-  image: archlinux:base@sha256:812644fa7bb7790deb91c55fb694461706103288dead4395694efad4b0bf0212
+  image: archlinux:base@sha256:8b0a7d7e22c2e78539406a37ba2a1eb431d31981be3d76e076f517d3b62204d0
   stage: integration-test
   needs:
     - build initrd
