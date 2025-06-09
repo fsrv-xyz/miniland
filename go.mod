@@ -2,7 +2,7 @@ module ref.ci/fsrvcorp/miniland/userland
 
 go 1.23.0
 
-toolchain go1.24.3
+toolchain go1.24.4
 
 require (
 	github.com/digineo/go-dhclient v1.0.2
