@@ -86,7 +86,7 @@ build initrd:
       - rootfs.cpio.gz
 
 download kernel:
-  image: archlinux:latest@sha256:7ca06cad29fe509ea1b4a0fb40485ca410fe5fdbea39888c5f3169b4961b2b14
+  image: archlinux:latest@sha256:7291088b2b8f143e29df31e80b254624c2a28d476a1820f88efcd8fb21e1360b
   stage: integration-test
   variables:
     KERNEL_URL: "https://ref.ci/fsrvcorp/miniland/kernel/-/jobs/34031/artifacts/raw/linux/arch/x86/boot/bzImage"
@@ -171,7 +171,7 @@ remove testvm:
     - rm /var/lib/vz/template/iso/output-${VMID}.iso
 
 .testvm_defaults:
-  image: archlinux:latest@sha256:7ca06cad29fe509ea1b4a0fb40485ca410fe5fdbea39888c5f3169b4961b2b14
+  image: archlinux:latest@sha256:7291088b2b8f143e29df31e80b254624c2a28d476a1820f88efcd8fb21e1360b
   stage: integration-test
   tags:
     - kubernetes-runner-dro1
