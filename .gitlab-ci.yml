@@ -6,7 +6,7 @@ stages:
 
 jsonlint:
   stage: test
-  image: registry.gitlab.com/pipeline-components/jsonlint:latest
+  image: registry.gitlab.com/pipeline-components/jsonlint:latest@sha256:12f9b6fbc353a8173047a26b9a5fcaa23758dadd269860a8af71d0fb7f67e2e1
   script:
     - |
       find . -not -path './.git/*' -name '*.json' -type f -print0 |
@@ -14,7 +14,7 @@ jsonlint:
 
 shellcheck:
   stage: test
-  image: registry.gitlab.com/pipeline-components/shellcheck:latest
+  image: registry.gitlab.com/pipeline-components/shellcheck:latest@sha256:aafd1af7cf56edb5daec8e8b553bfc0891ba0dd4afb86e7829f402d618b48e09
   script:
     - |
       find . -not -path './.git/*' -name '*.sh' -type f -print0 |
