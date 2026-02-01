@@ -2,7 +2,7 @@ module ref.ci/fsrvcorp/miniland/userland
 
 go 1.24.0
 
-toolchain go1.25.5
+toolchain go1.25.6
 
 require (
 	github.com/digineo/go-dhclient v1.0.2
@@ -12,7 +12,7 @@ require (
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.11.1
 	github.com/vishvananda/netlink v1.3.1
-	golang.org/x/sys v0.39.0
+	golang.org/x/sys v0.40.0
 )
 
 require (
